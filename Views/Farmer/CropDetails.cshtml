@@ -1,0 +1,33 @@
+﻿@model HarvestHub.WebApp.Models.Crop
+@{
+    ViewData["Title"] = "Crops Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="max-w-4xl mx-auto bg-white rounded shadow p-6">
+    <h2 class="text-2xl font-bold mb-4">@Model.Name</h2>
+
+    <!-- Image Slider -->
+    <div class="relative w-full h-72 overflow-hidden mb-6 rounded">
+        @if (Model.Images != null && Model.Images.Any())
+        {
+            @foreach (var img in Model.Images)
+            {
+                <img src="@img.ImageUrl" class="w-full h-72 object-cover mb-2 rounded" />
+            }
+        }
+        else
+        {
+            <img src="~/image/no-image.png" class="w-full h-72 object-cover" />
+        }
+    </div>
+
+    <p><strong>Variety:</strong> @Model.Variety</p>
+    <p><strong>Quantity:</strong> @Model.Quantity @Model.Unit</p>
+    <p><strong>Price:</strong> Rs. @Model.PricePerUnit / @Model.Unit</p>
+    <p><strong>Description:</strong> @Model.Description</p>
+
+    @if (Model.Report != null)
+    {
+        <p><strong>Lab Report:</strong> <a href="@Model.Report.ReportFilePath" target="_blank" class="text-blue-600 underline">View Report</a></p>
+    }
+</div>

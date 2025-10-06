@@ -1,0 +1,104 @@
+﻿@model IEnumerable<HarvestHub.WebApp.Models.Crop>
+@{
+    ViewData["Title"] = "My Crops";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<h2 class="text-2xl font-bold mb-4">My Crops</h2>
+<a asp-action="AddCrop" class="bg-green-600 text-white px-3 py-2 rounded">+ Add Crop</a>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+    @foreach (var crop in Model)
+    {
+        <div class="relative bg-white rounded shadow hover:shadow-lg transition">
+
+            <!-- Action Buttons -->
+            <div class="absolute top-2 right-2 flex space-x-2 z-10">
+                <a asp-action="EditCrop" asp-route-id="@crop.Id"
+                   class="bg-blue-500 text-white px-2 py-1 rounded text-sm hover:bg-blue-600">
+                    Edit
+                </a>
+                <form asp-action="DeleteCrop" asp-route-id="@crop.Id" method="post"
+                      class="inline delete-form" data-cropname="@crop.Name">
+                    <button type="submit"
+                            class="bg-red-500 text-white px-2 py-1 rounded text-sm hover:bg-red-600">
+                        Delete
+                    </button>
+                </form>
+            </div>
+
+            <!-- Image Slider -->
+            <div class="relative w-full h-48 overflow-hidden rounded-t cursor-pointer"
+                 onclick="window.location='@Url.Action("CropDetails", "Farmer", new { id = crop.Id })'">
+                @if (crop.Images != null && crop.Images.Any())
+                {
+                    <div id="slider-@crop.Id" class="relative h-48">
+                        @for (int i = 0; i < crop.Images.Count; i++)
+                        {
+                            <img src="@crop.Images.ElementAt(i).ImageUrl"
+                                 class="absolute inset-0 w-full h-48 object-cover transition-opacity duration-700 @(i == 0 ? "opacity-100" : "opacity-0")"
+                                 data-slide="@i" />
+                        }
+                    </div>
+                }
+                else
+                {
+                    <img src="~/image/no-image.png" class="w-full h-48 object-cover" />
+                }
+            </div>
+
+            <!-- Card Content -->
+            <div class="p-4 cursor-pointer"
+                 onclick="window.location='@Url.Action("CropDetails", "Farmer", new { id = crop.Id })'">
+                <h3 class="text-lg font-bold">@crop.Name</h3>
+                <p class="text-yellow-700 font-semibold">
+                    Rs. @crop.PricePerUnit / @crop.Unit
+                </p>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // ✅ Auto Image Slider
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll("[id^='slider-']").forEach(slider => {
+                let slides = slider.querySelectorAll("img");
+                let index = 0;
+                if (slides.length > 1) {
+                    setInterval(() => {
+                        slides[index].classList.remove("opacity-100");
+                        slides[index].classList.add("opacity-0");
+                        index = (index + 1) % slides.length;
+                        slides[index].classList.remove("opacity-0");
+                        slides[index].classList.add("opacity-100");
+                    }, 3000);
+                }
+            });
+
+            // ✅ SweetAlert for Delete
+            document.querySelectorAll(".delete-form").forEach(form => {
+                form.addEventListener("submit", function (e) {
+                    e.preventDefault();
+                    const cropName = form.getAttribute("data-cropname");
+
+                    Swal.fire({
+                        title: "Delete Crop?",
+                        text: `Are you sure you want to delete "${cropName}"?`,
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: "#d33",
+                        cancelButtonColor: "#3085d6",
+                        confirmButtonText: "Yes, delete it!",
+                        cancelButtonText: "Cancel"
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+}

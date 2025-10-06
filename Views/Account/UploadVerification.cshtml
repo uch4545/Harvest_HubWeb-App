@@ -1,0 +1,30 @@
+﻿@model dynamic
+@{
+    ViewData["Title"] = "Upload Verification Document";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+
+<form asp-action="UploadVerification" asp-controller="Account" method="post" enctype="multipart/form-data">
+    <div class="form-group">
+        <label for="documentType">Document Type</label>
+        <select class="form-control" id="documentType" name="documentType" required>
+            <option value="">-- Select Document Type --</option>
+            <option value="CNIC">CNIC</option>
+            <option value="License">Business License</option>
+            <option value="Other">Other</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="file">Upload File</label>
+        <input type="file" class="form-control" name="file" id="file" required />
+    </div>
+
+    <button type="submit" class="btn btn-success mt-2">Submit</button>
+</form>

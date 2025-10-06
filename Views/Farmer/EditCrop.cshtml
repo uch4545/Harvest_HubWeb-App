@@ -1,0 +1,89 @@
+﻿@model HarvestHub.WebApp.Models.Crop
+@{
+    ViewData["Title"] = "Edit Crop";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2 class="text-2xl font-bold text-yellow-700 mb-6">Edit Crop</h2>
+
+<form asp-action="EditCrop" method="post" enctype="multipart/form-data"
+      class="space-y-4 bg-white p-6 rounded shadow-md">
+    <input type="hidden" asp-for="Id" />
+
+    <div>
+        <label asp-for="Name" class="block font-semibold">Crop Name</label>
+        <input asp-for="Name" class="w-full border px-3 py-2 rounded" />
+    </div>
+
+    <div>
+        <label asp-for="Variety" class="block font-semibold">Variety</label>
+        <select asp-for="Variety" asp-items="Html.GetEnumSelectList<HarvestHub.WebApp.Models.CropVariety>()"
+                class="w-full border px-3 py-2 rounded"></select>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+        <div>
+            <label asp-for="Quantity" class="block font-semibold">Quantity</label>
+            <input asp-for="Quantity" class="w-full border px-3 py-2 rounded" />
+        </div>
+        <div>
+            <label asp-for="Unit" class="block font-semibold">Unit</label>
+            <select asp-for="Unit" class="w-full border px-3 py-2 rounded">
+                <option value="Kg" selected="@(Model.Unit == "Kg")">Kg</option>
+                <option value="Ton" selected="@(Model.Unit == "Ton")">Ton</option>
+                <option value="Bag" selected="@(Model.Unit == "Bag")">Bag</option>
+            </select>
+        </div>
+    </div>
+
+    <div>
+        <label asp-for="PricePerUnit" class="block font-semibold">Price Per Unit</label>
+        <input asp-for="PricePerUnit" class="w-full border px-3 py-2 rounded" />
+    </div>
+
+    <div>
+        <label asp-for="Description" class="block font-semibold">Description</label>
+        <textarea asp-for="Description" class="w-full border px-3 py-2 rounded"></textarea>
+    </div>
+
+    <!-- Current Images -->
+    <div>
+        <label class="block font-semibold">Current Images</label>
+        <div class="flex gap-2 flex-wrap">
+            @if (Model.Images != null && Model.Images.Any())
+            {
+                foreach (var img in Model.Images)
+                {
+                    <img src="@img.ImageUrl" class="h-20 w-20 object-cover rounded border" />
+                }
+            }
+            else
+            {
+                <p class="text-gray-500">No images uploaded.</p>
+            }
+        </div>
+    </div>
+
+    <!-- Upload New Images -->
+    <div>
+        <label class="block font-semibold">Upload New Images</label>
+        <input type="file" name="newImages" multiple class="w-full border px-3 py-2 rounded" />
+    </div>
+
+    <!-- Replace Report -->
+    <div>
+        <label class="block font-semibold">Replace Report</label>
+        <select name="laboratoryId" class="w-full border px-3 py-2 rounded">
+            <option value="">-- Select Lab --</option>
+            @foreach (var lab in ViewBag.Labs)
+            {
+                <option value="@lab.Id">@lab.LabName</option>
+            }
+        </select>
+        <input type="file" name="newReportFile" class="w-full border px-3 py-2 rounded mt-2" />
+    </div>
+
+    <button type="submit" class="bg-yellow-700 text-white px-4 py-2 rounded hover:bg-yellow-800">
+        Update Crop
+    </button>
+</form>

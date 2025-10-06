@@ -1,0 +1,19 @@
+﻿@using HarvestHub.WebApp.ViewModels
+@model VerifyOtpViewModel
+
+<form asp-action="VerifyOtp" method="post">
+    <div class="form-group">
+        <label>Email</label>
+        <input asp-for="Email" class="form-control" readonly />
+    </div>
+    <div class="form-group">
+        <label>Enter OTP</label>
+        <input asp-for="OtpCode" class="form-control" />
+        <span asp-validation-for="OtpCode" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-primary">Verify</button>
+</form>
+<form asp-action="ResendOtp" method="post">
+    <input type="hidden" name="Email" value="@Model.Email" />
+    <button type="submit" class="btn btn-link">Resend OTP</button>
+</form>

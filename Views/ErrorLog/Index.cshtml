@@ -1,0 +1,24 @@
+﻿@model IEnumerable<HarvestHub.WebApp.Models.ErrorLog>
+
+<h3>Error Logs</h3>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Controller</th>
+            <th>Action</th>
+            <th>Message</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var log in Model)
+        {
+            <tr>
+                <td>@log.CreatedAt.ToLocalTime()</td>
+                <td>@log.ControllerName</td>
+                <td>@log.ActionName</td>
+                <td>@log.ExceptionMessage</td>
+            </tr>
+        }
+    </tbody>
+</table>

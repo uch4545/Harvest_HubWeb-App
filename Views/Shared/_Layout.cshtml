@@ -1,49 +1,185 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Identity
+@using HarvestHub.WebApp.Models
+@inject UserManager<ApplicationUser> _userManager
+@inject SignInManager<ApplicationUser> _signInManager
+
+@{
+    var currentUser = await _userManager.GetUserAsync(User);
+    var fullName = currentUser?.FullName ?? "Guest";
+    var role = currentUser?.RoleType ?? "";
+}
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Harvest_Hub__Web_App_</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/Harvest_Hub__Web_App_.styles.css" asp-append-version="true" />
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewData["Title"] - HarvestHub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/png" href="~/image/harvest/N__1_-removebg-preview.png" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+             /* Admin / Data table base styles */
+             table {
+                 width: 100%;
+                 border-collapse: collapse;
+                 font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+                 table-layout: auto; /* or 'fixed' if you want fixed column widths */
+                 overflow: hidden;
+                 background: #fff;
+                 border-radius: 8px;
+             }
+
+                 /* Header */
+                 table thead th {
+                     text-align: left;
+                     padding: 12px 16px;
+                     background: #f7fafc; /* light bg */
+                     color: #1f2937; /* dark text */
+                     font-weight: 600;
+                     border-bottom: 1px solid #e5e7eb;
+                     vertical-align: middle;
+                 }
+
+                 /* Body rows */
+                 table tbody td {
+                     padding: 12px 16px;
+                     border-bottom: 1px solid #f1f5f9;
+                     color: #374151;
+                     vertical-align: middle; /* centers cell content vertically */
+                     white-space: nowrap; /* prevent wrapping for short columns; remove if you want wrap */
+                     overflow: hidden;
+                     text-overflow: ellipsis;
+                 }
+
+                 /* Zebra striping */
+                 table tbody tr:nth-child(even) {
+                     background: #fbfdff;
+                 }
+
+                 /* Action buttons cell */
+                 table td.actions {
+                     white-space: nowrap;
+                     text-align: center;
+                 }
+
+             /* Status badges */
+             .badge {
+                 display: inline-block;
+                 padding: 6px 10px;
+                 border-radius: 999px;
+                 font-size: 12px;
+                 font-weight: 600;
+                 color: #fff;
+             }
+
+                 .badge.green {
+                     background: #16a34a;
+                 }
+
+                 .badge.red {
+                     background: #dc2626;
+                 }
+
+                 .badge.yellow {
+                     background: #f59e0b;
+                 }
+
+             /* Responsive: wrap table in a scroll container on small screens */
+             .table-responsive {
+                 width: 100%;
+                 overflow-x: auto;
+                 -webkit-overflow-scrolling: touch;
+                 border-radius: 8px;
+                 box-shadow: 0 1px 2px rgba(15,23,42,0.03);
+             }
+
+             /* Optional: fixed first column (example) */
+             /* .admin-table th:first-child,
+        .admin-table td:first-child {
+          position: sticky;
+          left: 0;
+          background: #fff;
+          z-index: 2;
+          box-shadow: 2px 0 6px rgba(0,0,0,0.03);
+        } */
+
+             /* Small screens: reduce padding */
+             @@media (max-width: 640px) {
+                 table thead th,
+                 table tbody td {
+                     padding: 8px 10px;
+                     font-size: 13px;
+                 }
+             }
+    </style>
 </head>
-<body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Harvest_Hub__Web_App_</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
+<body class="bg-gray-100 min-h-screen flex">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-yellow-700 text-white flex flex-col">
+        <div class="px-6 py-4 text-2xl font-bold border-b border-yellow-600">
+            HarvestHub
+        </div>
+        <nav class="flex-1 px-4 py-6 space-y-2">
+            @if (role == "Buyer")
+            {
+                <a asp-controller="Buyer" asp-action="Dashboard"
+                   class="block py-2 px-3 rounded hover:bg-yellow-600">Dashboard</a>
+                <a asp-controller="Orders" asp-action="Index"
+                   class="block py-2 px-3 rounded hover:bg-yellow-600">My Orders</a>
+            }
+            else if (role == "Farmer")
+            {
+                <a asp-controller="Farmer" asp-action="Dashboard"
+                   class="block py-2 px-3 rounded hover:bg-yellow-600">Dashboard</a>
+                <a asp-controller="Farmer" asp-action="MyCrops"
+                   class="block py-2 px-3 rounded hover:bg-yellow-600">My Products</a>
+                <a asp-controller="Farmer" asp-action="MyReports"
+                   class="block py-2 px-3 rounded hover:bg-yellow-600">My Reports</a>
+            }
+            else if (role == "Admin")
+            {
+                <a asp-controller="Admin" asp-action="Dashboard"
+                   class="block py-2 px-3 rounded hover:bg-yellow-600">Admin Dashboard</a>
+                <a asp-controller="Admin" asp-action="ManageUsers"
+                   class="block py-2 px-3 rounded hover:bg-yellow-600">Manage Users</a>
+                <a asp-controller="Admin" asp-action="ManageProducts"
+                   class="block py-2 px-3 rounded hover:bg-yellow-600">Manage Products</a>
+                <a asp-controller="Admin" asp-action="VerifyDocuments"
+                   class="block py-2 px-3 rounded hover:bg-yellow-600">Verify Documents</a>
+                <a asp-controller="Admin" asp-action="ManageLabs"
+                   class="block py-2 px-3 rounded hover:bg-yellow-600">Manage Labs</a>
+
+            }
+
         </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
+        <div class="px-4 py-4 border-t border-yellow-600">
+            <p class="font-semibold">@fullName</p>
+            <form asp-controller="Account" asp-action="Logout" method="post" class="mt-2">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="w-full bg-red-600 hover:bg-red-700 py-2 px-4 rounded">
+                    Logout
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    <!-- Main content -->
+    <div class="flex-1 flex flex-col">
+        <!-- Top navbar -->
+        <header class="bg-white shadow px-6 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-semibold text-gray-800">@ViewData["Title"]</h1>
+            <span class="text-gray-600">Role: @role</span>
+        </header>
+
+        <!-- Page content -->
+        <main class="flex-1 p-6">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2025 - Harvest_Hub__Web_App_ - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
+    @RenderSection("Scripts", required: false)
 </body>
 </html>

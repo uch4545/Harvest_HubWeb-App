@@ -1,0 +1,37 @@
+﻿@model HarvestHub.WebApp.Models.Laboratory
+@{
+    ViewData["Title"] = "Add Laboratory";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1 class="text-2xl font-bold mb-4">Add Laboratory</h1>
+
+<form asp-action="CreateLab" method="post" class="space-y-4">
+    <div>
+        <label>Lab Name</label>
+        <input asp-for="LabName" class="w-full border px-3 py-2 rounded" />
+        <span asp-validation-for="LabName" class="text-red-500"></span>
+    </div>
+    <div>
+        <label>License Number</label>
+        <input asp-for="LicenseNumber" class="w-full border px-3 py-2 rounded" />
+        <span asp-validation-for="LicenseNumber" class="text-red-500"></span>
+    </div>
+    <div>
+        <label>Contact Person</label>
+        <input asp-for="ContactPerson" class="w-full border px-3 py-2 rounded" />
+    </div>
+    <div>
+        <label>Phone</label>
+        <input asp-for="Phone" class="w-full border px-3 py-2 rounded" />
+    </div>
+    <div>
+        <label>Email</label>
+        <input asp-for="Email" class="w-full border px-3 py-2 rounded" />
+    </div>
+    <div>
+        <label>Website / Social Media Link</label>
+        <input asp-for="WebsiteUrl" class="w-full border px-3 py-2 rounded" placeholder="https://www.example.com or https://facebook.com/lab" />
+    </div>
+    <button type="submit" class="bg-yellow-700 hover:bg-yellow-800 text-white px-4 py-2 rounded">Save</button>
+</form>

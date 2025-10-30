@@ -142,17 +142,40 @@ namespace HarvestHub.Controllers
                                          .Take(5)
                                          .ToListAsync();
 
-            ViewBag.RecentOrders = myOrders;
-            return View(buyer);
+            // 👇 All crops list
+            var crops = await _context.Crops
+                                      .Include(c => c.Images)
+                                      .Include(c => c.Farmer)
+                                      .ToListAsync();
+
+            var model = new BuyerDashboardViewModel
+            {
+                Buyer = buyer,
+                Crops = crops,
+                RecentOrders = myOrders
+            };
+
+            return View(model);
         }
 
         #endregion ==================== DASHBOARD ====================
-        // ==================== FORGOT PASSWORD ====================
-
-        [AllowAnonymous]
-        public IActionResult ForgotPassword()
+        #region==================== CROPS DETAILS ====================
+        public async Task <IActionResult> cropDetails(int id)
         {
-            return View();
+            var crop = await _context.Crops
+                             .Include(c => c.Images)
+                             .Include(c => c.Farmer)
+                             .FirstOrDefaultAsync(c => c.Id == id);
+            if (crop == null)
+                return NotFound();
+
+            // Explicit full path for view
+            return View("~/Views/Crop/CropDetails.cshtml", crop);
+
         }
+        #endregion
+
+
+
     }
 }

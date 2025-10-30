@@ -17,11 +17,10 @@ namespace Data
         public DbSet<Laboratory> Laboratories { get; set; }
         public DbSet<LabReport> LabReports { get; set; }
         public DbSet<CropImage> CropImages { get; set; }
-
         public DbSet<Order> Orders { get; set; }
         public DbSet<ErrorLog> ErrorLogs { get; set; }
-
-
+       
+        public DbSet<MarketRate> MarketRates { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

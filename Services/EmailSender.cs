@@ -35,5 +35,6 @@ public class EmailSender : IEmailSender
 
         await client.SendMailAsync(mailMessage); // This line must complete successfully.
     }
+
 }
 

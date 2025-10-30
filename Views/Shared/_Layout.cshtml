@@ -125,10 +125,19 @@
         <nav class="flex-1 px-4 py-6 space-y-2">
             @if (role == "Buyer")
             {
+               
                 <a asp-controller="Buyer" asp-action="Dashboard"
                    class="block py-2 px-3 rounded hover:bg-yellow-600">Dashboard</a>
                 <a asp-controller="Orders" asp-action="Index"
                    class="block py-2 px-3 rounded hover:bg-yellow-600">My Orders</a>
+                <a href="@Url.Action("Index", "MarketRates")"
+                   class="block py-2 px-3 rounded hover:bg-yellow-600">
+                    View Live Market Rates
+                    
+                </a>
+             
+             
+
             }
             else if (role == "Farmer")
             {
@@ -138,6 +147,11 @@
                    class="block py-2 px-3 rounded hover:bg-yellow-600">My Products</a>
                 <a asp-controller="Farmer" asp-action="MyReports"
                    class="block py-2 px-3 rounded hover:bg-yellow-600">My Reports</a>
+                <a href="@Url.Action("Index", "MarketRates")"
+                   class="block py-2 px-3 rounded hover:bg-yellow-600">
+                    View Live Market Rates
+
+                </a>
             }
             else if (role == "Admin")
             {

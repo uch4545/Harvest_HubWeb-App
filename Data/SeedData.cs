@@ -1,10 +1,15 @@
-﻿using HarvestHub.WebApp.Models;
+﻿using Data;
+using HarvestHub.WebApp.Models;
 using Microsoft.AspNetCore.Identity;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace HarvestHub.WebApp.Data
 {
     public static class SeedData
     {
+        // ✅ Seed Admin Role + User
         public static async Task SeedRolesAndAdminAsync(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
         {
             // ✅ Ensure Admin role exists
@@ -28,21 +33,33 @@ namespace HarvestHub.WebApp.Data
                     EmailConfirmed = true,
                     CNIC = "00000-0000000-0",
                     PhoneNumber = "0000000000",
-
-                    // 🔹 Add these two lines
                     OtpCode = "000000",
                     OtpExpiry = DateTime.UtcNow.AddYears(10)
                 };
 
-
-
-                // Create with strong password
                 var result = await userManager.CreateAsync(adminUser, "Admin@123");
 
                 if (result.Succeeded)
                 {
                     await userManager.AddToRoleAsync(adminUser, "Admin");
                 }
+            }
+        }
+
+        // ✅ Seed Market Rates Sample Data
+        public static async Task SeedMarketRatesAsync(ApplicationDbContext context)
+        {
+            if (!context.MarketRates.Any())
+            {
+                context.MarketRates.AddRange(
+                    new MarketRate { CropName = "Wheat", Rate = 4200, Date = DateTime.Now },
+                    new MarketRate { CropName = "Rice", Rate = 5000, Date = DateTime.Now },
+                    new MarketRate { CropName = "Sugarcane", Rate = 250, Date = DateTime.Now },
+                    new MarketRate { CropName = "Cotton", Rate = 8700, Date = DateTime.Now },
+                    new MarketRate { CropName = "Maize", Rate = 3100, Date = DateTime.Now }
+                );
+
+                await context.SaveChangesAsync();
             }
         }
     }

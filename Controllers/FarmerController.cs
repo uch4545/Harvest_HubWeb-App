@@ -135,7 +135,7 @@ namespace HarvestHub.WebApp.Controllers
 
         #region ==================== CROPS CRUD ====================
 
-        // List Crops
+        // CROP LIST
         public async Task<IActionResult> MyCrops()
         {
             var user = await _userManager.GetUserAsync(User);
@@ -351,7 +351,7 @@ namespace HarvestHub.WebApp.Controllers
             await _context.SaveChangesAsync();
             return RedirectToAction("MyCrops");
         }
-
+        //Details Crop
 
         public async Task<IActionResult> CropDetails(int id)
         {
@@ -360,13 +360,17 @@ namespace HarvestHub.WebApp.Controllers
                                      .Include(c => c.Farmer)
                                      .FirstOrDefaultAsync(c => c.Id == id);
 
-            if (crop == null) return NotFound();
-            return View(crop);
+            if (crop == null)
+                return NotFound();
+
+            // Explicit full path for view
+            return View("~/Views/Crop/CropDetails.cshtml", crop);
         }
+
 
         #endregion
 
-        // ================== LIST REPORTS ==================
+        #region================== LIST REPORTS ==================
         public async Task<IActionResult> MyReports()
         {
             var user = await _userManager.GetUserAsync(User);
@@ -386,7 +390,7 @@ namespace HarvestHub.WebApp.Controllers
 
             return View(reports);
         }
-
+        #endregion
 
 
     }

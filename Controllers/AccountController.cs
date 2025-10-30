@@ -409,7 +409,7 @@ namespace HarvestHub.Controllers
                 return View();
             }
 
-            var user = await _userManager.FindByEmailAsync(email);
+            var user = _userManager.Users.FirstOrDefault(u => u.Email.ToLower() == email.ToLower());
             if (user == null || !(await _userManager.IsEmailConfirmedAsync(user)))
             {
                 // Security: Don't reveal user existence

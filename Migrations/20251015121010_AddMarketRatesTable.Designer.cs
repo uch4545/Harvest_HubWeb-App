@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Harvest_Hub_WebApp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251006120224_AddErrorLogsTable")]
-    partial class AddErrorLogsTable
+    [Migration("20251015121010_AddMarketRatesTable")]
+    partial class AddMarketRatesTable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -361,6 +361,29 @@ namespace Harvest_Hub_WebApp.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Laboratories");
+                });
+
+            modelBuilder.Entity("HarvestHub.WebApp.Models.MarketRate", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("CropName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("CurrentRate")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("LastUpdated")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MarketRates");
                 });
 
             modelBuilder.Entity("HarvestHub.WebApp.Models.Order", b =>

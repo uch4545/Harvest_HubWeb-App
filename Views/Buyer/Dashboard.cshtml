@@ -1,23 +1,37 @@
-﻿@model HarvestHub.WebApp.Models.Buyer
+﻿@model HarvestHub.WebApp.Models.BuyerDashboardViewModel
 @{
     ViewData["Title"] = "Buyer Dashboard";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <div class="max-w-3xl mx-auto mt-10 bg-white shadow-lg rounded-lg p-6 space-y-4">
-    <h2 class="text-2xl font-bold text-yellow-700">Welcome, @Model.FullName!</h2>
+    <h2 class="text-2xl font-bold text-yellow-700">Welcome, @Model.Buyer.FullName!</h2>
 
     <div class="text-gray-800">
-        <p><strong>Email:</strong> @Model.Email</p>
-        <p><strong>CNIC:</strong> @Model.CNIC</p>
+        <p><strong>Email:</strong> @Model.Buyer.Email</p>
+        <p><strong>CNIC:</strong> @Model.Buyer.CNIC</p>
+    </div>
+
+    <h3 class="text-xl font-semibold mt-6 mb-2">Available Crops</h3>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        @foreach (var crop in Model.Crops)
+        {
+            <div class="border rounded p-4 shadow">
+                <h4 class="font-bold">@crop.Name</h4>
+                <p>@crop.Variety</p>
+                <p>Rs. @crop.PricePerUnit / @crop.Unit</p>
+                <a href="@Url.Action("CropDetails", "Buyer", new { id = crop.Id })"
+                   class="text-blue-600 underline">
+                    View Details
+                </a>
+            </div>
+        }
     </div>
 
     <form asp-controller="Account" asp-action="Logout" method="post">
         @Html.AntiForgeryToken()
-        <button type="submit"
-                class="mt-4 bg-yellow-600 hover:bg-yellow-700 text-white font-semibold py-2 px-4 rounded transition duration-200">
-            Logout
-        </button>
+      
     </form>
-
+   
 </div>

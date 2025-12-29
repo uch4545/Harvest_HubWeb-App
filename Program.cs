@@ -8,7 +8,7 @@ using HarvestHub.WebApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ✅ Add Entity Framework & Identity services
+builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -24,6 +24,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
     options.Password.RequiredLength = 6;
     options.Password.RequiredUniqueChars = 1;
 })
+
 .AddEntityFrameworkStores<ApplicationDbContext>()
 .AddDefaultTokenProviders(); // ✅ Needed for OTP, password reset etc.
 
@@ -50,17 +51,28 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services
+    .AddControllersWithViews()
+    .AddViewLocalization()
+    .AddDataAnnotationsLocalization();
 
-// ✅ Build the app
 var app = builder.Build();
 
-// ✅ HTTP pipeline configuration
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
-
+var supportedCultures = new[] { "en", "ur" };
+var localizationOptions = new RequestLocalizationOptions
+{
+    DefaultRequestCulture = new Microsoft.AspNetCore.Localization.RequestCulture("en"),
+    SupportedCultures = supportedCultures.Select(c => new System.Globalization.CultureInfo(c)).ToList(),
+    SupportedUICultures = supportedCultures.Select(c => new System.Globalization.CultureInfo(c)).ToList()
+};
+// Add cookie provider for language persistence
+localizationOptions.RequestCultureProviders.Insert(0, new Microsoft.AspNetCore.Localization.CookieRequestCultureProvider());
+app.UseRequestLocalization(localizationOptions);
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseCors();

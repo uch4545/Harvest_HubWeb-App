@@ -3,6 +3,57 @@
     ViewData["Title"] = "Crops Details";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
+
+<style>
+    .chat-btn {
+        background: linear-gradient(135deg, #2e7d32, #4caf50);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 25px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+    }
+    
+    .chat-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(46, 125, 50, 0.4);
+        color: white;
+    }
+    
+    .farmer-card {
+        background: linear-gradient(135deg, #f5f5f5, #e8e8e8);
+        border-radius: 10px;
+        padding: 20px;
+        margin-top: 20px;
+        border-left: 4px solid #2e7d32;
+    }
+    
+    .farmer-info {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .farmer-avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #2e7d32, #4caf50);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+        font-weight: bold;
+    }
+</style>
+
 <div class="max-w-4xl mx-auto bg-white rounded shadow p-6">
     <h2 class="text-2xl font-bold mb-4">@Model.Name</h2>
 
@@ -30,4 +81,44 @@
     {
         <p><strong>Lab Report:</strong> <a href="@Model.Report.ReportFilePath" target="_blank" class="text-blue-600 underline">View Report</a></p>
     }
+
+    <!-- Farmer Info Section -->
+    @if (Model.Farmer != null)
+    {
+        <div class="farmer-card">
+            <h4 class="mb-3"><strong>🧑‍🌾 Farmer Details / کسان کی تفصیلات</strong></h4>
+            <div class="farmer-info">
+                <div class="farmer-avatar">
+                    @(Model.Farmer.FullName?.Substring(0, 1).ToUpper() ?? "F")
+                </div>
+                <div>
+                    <p class="mb-1"><strong>Name:</strong> @Model.Farmer.FullName</p>
+                    <p class="mb-0"><strong>Email:</strong> @Model.Farmer.Email</p>
+                </div>
+            </div>
+            
+            <!-- Chat with Farmer Button (Only for Buyers) -->
+            @if (User.Identity?.IsAuthenticated == true && User.IsInRole("Buyer"))
+            {
+                <div class="mt-4">
+                    <form asp-controller="Chat" asp-action="StartConversation" method="post">
+                        <input type="hidden" name="farmerId" value="@Model.Farmer.ApplicationUserId" />
+                        <input type="hidden" name="cropId" value="@Model.Id" />
+                        <button type="submit" class="chat-btn">
+                            💬 Chat with Farmer / کسان سے بات کریں
+                        </button>
+                    </form>
+                </div>
+            }
+            else if (!(User.Identity?.IsAuthenticated == true))
+            {
+                <div class="mt-4">
+                    <a href="@Url.Action("Login", "Buyer")" class="chat-btn">
+                        🔑 Login to Chat / چیٹ کے لیے لاگ ان کریں
+                    </a>
+                </div>
+            }
+        </div>
+    }
 </div>
+

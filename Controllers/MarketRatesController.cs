@@ -21,12 +21,20 @@ namespace HarvestHub.WebApp.Controllers
         // GET: /MarketRates
         public async Task<IActionResult> Index()
         {
-            // ✅ Always fetch fresh data from database
-            var rates = await _context.MarketRates
-                .OrderBy(r => r.CropName)
-                .ToListAsync();
+            try
+            {
+                var rates = await _context.MarketRates
+                    .OrderBy(r => r.CropName)
+                    .ToListAsync();
 
-            return View(rates);
+                return View(rates);
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Error loading rates. Please try again.";
+                Console.WriteLine($"❌ MarketRates Index error: {ex.Message}");
+                return View(new List<MarketRate>());
+            }
         }
 
         // POST: /MarketRates/UpdateNow
@@ -37,40 +45,170 @@ namespace HarvestHub.WebApp.Controllers
             {
                 var latestRates = await _service.FetchLatestRatesAsync();
 
+                if (!latestRates.Any())
+                {
+                    TempData["Error"] = "No rates available from the service.";
+                    return RedirectToAction("Index");
+                }
+
+                // Clear old data and add fresh Pakistan crop rates
+                var existingRates = await _context.MarketRates.ToListAsync();
+                _context.MarketRates.RemoveRange(existingRates);
+                
                 foreach (var dto in latestRates)
                 {
-                    var existing = await _context.MarketRates
-                        .FirstOrDefaultAsync(r => r.CropName.ToLower() == dto.CropName.ToLower());
-
-                    if (existing != null)
+                    _context.MarketRates.Add(new MarketRate
                     {
-                        existing.CurrentRate = dto.CurrentRate;
-                        existing.LastUpdated = dto.LastUpdated;
-                        _context.MarketRates.Update(existing);
-                    }
-                    else
-                    {
-                        var newRate = new MarketRate
-                        {
-                            CropName = dto.CropName,
-                            CurrentRate = dto.CurrentRate,
-                            LastUpdated = dto.LastUpdated
-                        };
-                        _context.MarketRates.Add(newRate);
-                    }
+                        CropName = dto.CropName,
+                        CropNameUrdu = dto.CropNameUrdu,
+                        CurrentRate = dto.CurrentRate,
+                        Unit = dto.Unit,
+                        LastUpdated = dto.LastUpdated
+                    });
                 }
 
                 await _context.SaveChangesAsync();
-
-                TempData["Success"] = $"✅ {latestRates.Count} market rates updated successfully!";
+                TempData["Success"] = $"✅ {latestRates.Count} Pakistan crop rates updated successfully!";
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 TempData["Error"] = $"❌ Error updating rates: {ex.Message}";
+                Console.WriteLine($"❌ UpdateNow error: {ex.Message}");
             }
 
-            // ✅ Force fresh reload
-            return RedirectToAction("Index", new { t = DateTime.Now.Ticks });
+            return RedirectToAction("Index");
         }
+
+        #region Admin Actions
+
+        // GET: /Admin/ManageRates
+        [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin")]
+        public async Task<IActionResult> ManageRates()
+        {
+            try
+            {
+                var rates = await _context.MarketRates
+                    .OrderBy(r => r.CropName)
+                    .ToListAsync();
+
+                return View("~/Views/Admin/ManageRates.cshtml", rates);
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Error loading rates. Please try again.";
+                Console.WriteLine($"❌ ManageRates error: {ex.Message}");
+                return RedirectToAction("Dashboard", "Admin");
+            }
+        }
+
+        // GET: /MarketRates/Create
+        [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin")]
+        public IActionResult Create()
+        {
+            return View();
+        }
+
+        // POST: /MarketRates/Create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Create(MarketRate rate)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                    return View(rate);
+
+                rate.LastUpdated = DateTime.UtcNow;
+                _context.MarketRates.Add(rate);
+                await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = "Market rate added successfully!";
+                return RedirectToAction("ManageRates");
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Error adding rate. Please try again.";
+                Console.WriteLine($"❌ Create error: {ex.Message}");
+                return View(rate);
+            }
+        }
+
+        // GET: /MarketRates/Edit/5
+        [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Edit(int id)
+        {
+            try
+            {
+                var rate = await _context.MarketRates.FindAsync(id);
+                if (rate == null)
+                    return NotFound();
+
+                return View(rate);
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Error loading rate. Please try again.";
+                Console.WriteLine($"❌ Edit GET error: {ex.Message}");
+                return RedirectToAction("ManageRates");
+            }
+        }
+
+        // POST: /MarketRates/Edit/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Edit(int id, MarketRate rate)
+        {
+            try
+            {
+                if (id != rate.Id)
+                    return NotFound();
+
+                if (!ModelState.IsValid)
+                    return View(rate);
+
+                rate.LastUpdated = DateTime.UtcNow;
+                _context.MarketRates.Update(rate);
+                await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = "Market rate updated successfully!";
+                return RedirectToAction("ManageRates");
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Error updating rate. Please try again.";
+                Console.WriteLine($"❌ Edit POST error: {ex.Message}");
+                return View(rate);
+            }
+        }
+
+        // POST: /MarketRates/Delete/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            try
+            {
+                var rate = await _context.MarketRates.FindAsync(id);
+                if (rate == null)
+                    return NotFound();
+
+                _context.MarketRates.Remove(rate);
+                await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = "Market rate deleted successfully!";
+                return RedirectToAction("ManageRates");
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Error deleting rate. Please try again.";
+                Console.WriteLine($"❌ Delete error: {ex.Message}");
+                return RedirectToAction("ManageRates");
+            }
+        }
+
+        #endregion
     }
 }

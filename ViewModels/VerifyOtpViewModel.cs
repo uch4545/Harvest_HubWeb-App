@@ -11,6 +11,6 @@ namespace HarvestHub.WebApp.ViewModels
         [Required(ErrorMessage = "OTP is required.")]
         [Display(Name = "OTP Code")]
         [RegularExpression(@"^\d{6}$", ErrorMessage = "OTP must be a 6-digit numeric code.")]
-        public string OtpCode { get; set; }
+        public string? OtpCode { get; set; }
     }
 }

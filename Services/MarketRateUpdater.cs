@@ -20,35 +20,46 @@ namespace HarvestHub.WebApp.Services
 
         public async Task UpdateMarketRatesAsync()
         {
-            var dtos = await _fetcher.FetchLatestRatesAsync();
-
-            if (dtos == null || !dtos.Any())
+            try
             {
-                Console.WriteLine("⚠️ No rates fetched! Check data source or API.");
-                return;
-            }
+                var dtos = await _fetcher.FetchLatestRatesAsync();
 
-            foreach (var dto in dtos)
-            {
-                var existing = _db.MarketRates.FirstOrDefault(m => m.CropName == dto.CropName);
-                if (existing != null)
+                if (dtos == null || !dtos.Any())
                 {
-                    existing.CurrentRate = dto.CurrentRate;
-                    existing.LastUpdated = dto.LastUpdated;
+                    Console.WriteLine("⚠️ No rates fetched! Check data source or API.");
+                    return;
                 }
-                else
+
+                foreach (var dto in dtos)
                 {
-                    _db.MarketRates.Add(new MarketRate
+                    var existing = _db.MarketRates.FirstOrDefault(m => m.CropName == dto.CropName);
+                    if (existing != null)
                     {
-                        CropName = dto.CropName,
-                        CurrentRate = dto.CurrentRate,
-                        LastUpdated = dto.LastUpdated
-                    });
+                        existing.CurrentRate = dto.CurrentRate;
+                        existing.LastUpdated = dto.LastUpdated;
+                        existing.Unit = dto.Unit;
+                        existing.CropNameUrdu = dto.CropNameUrdu;
+                    }
+                    else
+                    {
+                        _db.MarketRates.Add(new MarketRate
+                        {
+                            CropName = dto.CropName,
+                            CropNameUrdu = dto.CropNameUrdu,
+                            CurrentRate = dto.CurrentRate,
+                            Unit = dto.Unit,
+                            LastUpdated = dto.LastUpdated
+                        });
+                    }
                 }
-            }
 
-            await _db.SaveChangesAsync();
-            Console.WriteLine("✅ Market rates updated successfully!");
+                await _db.SaveChangesAsync();
+                Console.WriteLine("✅ Market rates updated successfully!");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Error updating market rates: {ex.Message}");
+            }
         }
     }
 }

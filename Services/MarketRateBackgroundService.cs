@@ -31,7 +31,7 @@ namespace HarvestHub.WebApp.Services
                 catch (TaskCanceledException) { /* stopping */ }
                 catch (Exception ex)
                 {
-                    // log if you have logger (inject via scope if needed)
+                    Console.WriteLine($"❌ Background service error: {ex.Message}");
                 }
             }
         }

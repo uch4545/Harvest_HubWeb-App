@@ -33,6 +33,19 @@ namespace HarvestHub.Controllers
             _context = context;
         }
 
+        #region ---------------- Login Redirect Handler ----------------
+
+        // Catch-all for /Account/Login - redirect to welcome page
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult Login(string returnUrl = null)
+        {
+            // Redirect to Home/Index (welcome page) instead of showing 404
+            return RedirectToAction("Index", "Home");
+        }
+
+        #endregion
+
         #region ---------------- Buyer Registration ----------------
 
         [HttpGet]
@@ -384,7 +397,9 @@ namespace HarvestHub.Controllers
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
-            return RedirectToAction("Login", "Buyer");
+            
+            // Redirect to welcome page instead of specific login
+            return RedirectToAction("Index", "Home");
         }
 
         #endregion

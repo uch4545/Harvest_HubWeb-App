@@ -1,90 +1,317 @@
 ﻿@model HarvestHub.WebApp.ViewModels.BuyerRegisterViewModel
 @{
-	Layout = null;
+    ViewData["Title"] = "Buyer Registration";
+    Layout = null;
 }
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="UTF-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<title>Buyer Registration</title>
-	<script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="UTF-8" />
+    <title>@ViewData["Title"] - HarvestHub</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+        
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(7, 94, 84, 0.85), rgba(18, 140, 126, 0.85)),
+                        url('https://images.unsplash.com/photo-1560493676-04071c5f467b?w=1920') center/cover no-repeat fixed;
+        }
+        
+        .register-container {
+            display: flex;
+            max-width: 1100px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 25px;
+            overflow: hidden;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+        
+        .register-image {
+            flex: 0.8;
+            background: linear-gradient(135deg, rgba(7, 94, 84, 0.9), rgba(37, 211, 102, 0.8)),
+                        url('https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=800') center/cover;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            color: white;
+            text-align: center;
+        }
+        
+        .register-image h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.3);
+        }
+        
+        .register-image p {
+            font-size: 1rem;
+            opacity: 0.95;
+            max-width: 280px;
+            line-height: 1.6;
+        }
+        
+        .register-image .logo-icon {
+            font-size: 3.5rem;
+            margin-bottom: 15px;
+        }
+        
+        .register-image .features {
+            margin-top: 30px;
+            text-align: left;
+        }
+        
+        .register-image .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+            font-size: 0.95rem;
+        }
+        
+        .register-form {
+            flex: 1.2;
+            padding: 40px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .form-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        
+        .form-header h2 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #075e54;
+            margin-bottom: 5px;
+        }
+        
+        .form-header p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .form-group {
+            margin-bottom: 18px;
+        }
+        
+        .form-group.full-width {
+            grid-column: span 2;
+        }
+        
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 6px;
+            font-size: 0.85rem;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+            outline: none;
+        }
+        
+        .form-group input:focus {
+            border-color: #128c7e;
+            box-shadow: 0 0 0 3px rgba(18, 140, 126, 0.1);
+        }
+        
+        .validation-error {
+            color: #dc2626;
+            font-size: 0.8rem;
+            margin-top: 4px;
+        }
+        
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #075e54, #128c7e);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(7, 94, 84, 0.3);
+            margin-top: 10px;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(7, 94, 84, 0.4);
+        }
+        
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .login-link a {
+            color: #075e54;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        
+        .error-summary {
+            background: #ffebee;
+            border-left: 4px solid #f44336;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            color: #c62828;
+            font-size: 0.9rem;
+        }
+        
+        /* Scrollbar */
+        .register-form::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .register-form::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+        
+        /* Mobile Responsive */
+        @@media (max-width: 900px) {
+            .register-container {
+                flex-direction: column;
+            }
+            
+            .register-image {
+                padding: 25px;
+            }
+            
+            .register-image .features {
+                display: none;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-group.full-width {
+                grid-column: span 1;
+            }
+        }
+    </style>
 </head>
-<body class="bg-yellow-50 min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8">
-
-	<div class="bg-white shadow-2xl rounded-2xl p-6 sm:p-8 md:p-10 w-full max-w-md sm:max-w-lg space-y-6 animate-fade-in transition-all duration-500 ease-in-out">
-		<h2 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-yellow-600 text-center">Register as Buyer</h2>
-
-		<form asp-controller="Account" asp-action="BuyerRegister" method="post" novalidate class="space-y-5 sm:space-y-6">
-			@Html.AntiForgeryToken()
-
-			@Html.ValidationSummary(true, "", new { @class = "text-red-600 text-sm mb-4" })
-
-			<!-- Full Name -->
-			<div>
-				<label asp-for="FullName" class="block text-gray-800 font-medium mb-1">Full Name</label>
-				<input asp-for="FullName" placeholder="e.g. Ali Khan"
-					   class="w-full px-3 py-2 sm:py-3 border border-gray-300 rounded-lg text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-green-500" />
-				<span asp-validation-for="FullName" class="text-red-600 text-sm mt-1 block"></span>
-			</div>
-
-			<!-- CNIC -->
-			<div>
-				<label asp-for="CNIC" class="block text-gray-800 font-medium mb-1">CNIC</label>
-				<input asp-for="CNIC" placeholder="e.g. 35201-1234567-1"
-					   class="w-full px-3 py-2 sm:py-3 border border-gray-300 rounded-lg text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-green-500" />
-				<span asp-validation-for="CNIC" class="text-red-600 text-sm mt-1 block"></span>
-			</div>
-
-			<!-- Phone Number -->
-			<div>
-				<label asp-for="PhoneNumber" class="block text-gray-800 font-medium mb-1">Phone Number</label>
-				<input asp-for="PhoneNumber" placeholder="e.g. 0301-1234567"
-					   class="w-full px-3 py-2 sm:py-3 border border-gray-300 rounded-lg text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-green-500" />
-				<span asp-validation-for="PhoneNumber" class="text-red-600 text-sm mt-1 block"></span>
-			</div>
-
-			<!-- Email -->
-			<div>
-				<label asp-for="Email" class="block text-gray-800 font-medium mb-1">Email</label>
-				<input asp-for="Email" placeholder="e.g. abc@gmail.com"
-					   class="w-full px-3 py-2 sm:py-3 border border-gray-300 rounded-lg text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-green-500" />
-				<span asp-validation-for="Email" class="text-red-600 text-sm mt-1 block"></span>
-			</div>
-
-			<!-- Password -->
-			<div>
-				<label asp-for="Password" class="block text-gray-800 font-medium mb-1">Password</label>
-				<input asp-for="Password" type="password" (e.g. Usama@123)"
-					   type="password"
-					   class="w-full px-3 py-2 sm:py-3 border border-gray-300 rounded-lg text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-green-500" />
-
-				<span asp-validation-for="Password" class="text-red-600 text-sm mt-1 block"></span>
-			</div>
-
-			<!-- Role Type (Hidden) -->
-			<input type="hidden" asp-for="RoleType" value="Buyer" />
-
-			<!-- Submit -->
-			<div>
-				<button type="submit"
-						class="w-full bg-yellow-600 hover:bg-yellow-700 text-white font-semibold py-2 sm:py-3 rounded-lg transition-all duration-300 shadow-md text-sm sm:text-base">
-					Register
-				</button>
-			</div>
-		</form>
-
-		<form asp-action="VerifyOtp" method="get">
-			<input type="hidden" name="email" value="@Model.Email" />
-			<button type="submit" class="btn btn-warning">Go to OTP Verification</button>
-		</form>
-
-		<p class="text-sm sm:text-base text-center text-gray-600">
-			Already have an account?
-			<a href="@Url.Action("Login", "Buyer")" class="text-yellow-600 font-medium hover:underline">Login here</a>
-		</p>
-	</div>
-
+<body>
+    <div class="register-container">
+        <!-- Left Side - Image & Branding -->
+        <div class="register-image">
+            <div class="logo-icon">🛒</div>
+            <h1>Join HarvestHub</h1>
+            <p>Buy fresh crops directly from farmers at best prices</p>
+            <p style="margin-top: 10px; direction: rtl; font-size: 0.95rem;">
+                کسانوں سے براہ راست بہترین قیمتوں پر تازہ فصلیں خریدیں
+            </p>
+            
+            <div class="features">
+                <div class="feature-item">✅ Direct from farmers</div>
+                <div class="feature-item">✅ Fresh quality crops</div>
+                <div class="feature-item">✅ Real market prices</div>
+                <div class="feature-item">✅ Secure payments</div>
+                <div class="feature-item">✅ Chat with farmers</div>
+            </div>
+        </div>
+        
+        <!-- Right Side - Register Form -->
+        <div class="register-form">
+            <div class="form-header">
+                <h2>🛒 Buyer Registration</h2>
+                <p>Create your account to start buying / اکاؤنٹ بنائیں</p>
+            </div>
+            
+            <form asp-controller="Account" asp-action="BuyerRegister" method="post" novalidate>
+                @Html.AntiForgeryToken()
+                
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="error-summary">
+                        @Html.ValidationSummary(true, "")
+                    </div>
+                }
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>👤 Full Name / پورا نام</label>
+                        <input asp-for="FullName" placeholder="e.g. Ali Khan" />
+                        <span asp-validation-for="FullName" class="validation-error"></span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>🆔 CNIC / شناختی کارڈ</label>
+                        <input asp-for="CNIC" placeholder="e.g. 35201-1234567-1" />
+                        <span asp-validation-for="CNIC" class="validation-error"></span>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>📱 Phone Number / فون نمبر</label>
+                        <input asp-for="PhoneNumber" placeholder="e.g. 0301-1234567" />
+                        <span asp-validation-for="PhoneNumber" class="validation-error"></span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>📧 Email / ای میل</label>
+                        <input asp-for="Email" type="email" placeholder="e.g. buyer@gmail.com" />
+                        <span asp-validation-for="Email" class="validation-error"></span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>🔒 Password / پاس ورڈ</label>
+                    <input asp-for="Password" type="password" placeholder="Minimum 6 characters with uppercase, number & symbol" />
+                    <span asp-validation-for="Password" class="validation-error"></span>
+                </div>
+                
+                <input type="hidden" asp-for="RoleType" value="Buyer" />
+                
+                <button type="submit" class="submit-btn">
+                    Register / رجسٹر کریں
+                </button>
+            </form>
+            
+            <div class="login-link">
+                Already have an account? 
+                <a href="@Url.Action("Login", "Buyer")">Login here / لاگ ان کریں</a>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

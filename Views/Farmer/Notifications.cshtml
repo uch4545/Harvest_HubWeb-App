@@ -1,0 +1,407 @@
+@model IEnumerable<HarvestHub.WebApp.Models.Notification>
+@{
+    ViewData["Title"] = "Notifications";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .notifications-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .page-header {
+        background: linear-gradient(135deg, #075e54, #128c7e);
+        color: white;
+        padding: 30px;
+        border-radius: 20px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px rgba(7, 94, 84, 0.3);
+    }
+    
+    .page-header h2 {
+        margin: 0 0 8px 0;
+        font-size: 1.8rem;
+        font-weight: 700;
+    }
+    
+    .page-header p {
+        margin: 0;
+        opacity: 0.9;
+    }
+    
+    .notifications-grid {
+        display: grid;
+        gap: 20px;
+    }
+    
+    .notification-card {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        border-left: 5px solid #128c7e;
+    }
+    
+    .notification-card.unread {
+        background: linear-gradient(to right, #e8f5e9 0%, white 100%);
+        border-left-color: #ff6b35;
+    }
+    
+    .notification-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    
+    .notification-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+    
+    .notification-badge {
+        padding: 5px 12px;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    
+    .badge-new {
+        background: #ff6b35;
+        color: white;
+    }
+    
+    .badge-read {
+        background: #e0e0e0;
+        color: #666;
+    }
+    
+    .notification-time {
+        color: #666;
+        font-size: 0.9rem;
+    }
+    
+    .notification-body {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        gap: 20px;
+        align-items: center;
+    }
+    
+    .crop-image-small {
+        width: 100px;
+        height: 100px;
+        border-radius: 10px;
+        object-fit: cover;
+        background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+    }
+    
+    .crop-image-small img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 10px;
+    }
+    
+    .notification-details {
+        flex: 1;
+    }
+    
+    .notification-title {
+        font-size: 1.2rem;
+        font-weight: 700;
+       color: #1a1a1a;
+        margin-bottom: 10px;
+    }
+    
+    .notification-info {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-top: 10px;
+    }
+    
+    .info-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 0.9rem;
+        color: #666;
+    }
+    
+    .info-item strong {
+        color: #1a1a1a;
+    }
+    
+    .action-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        min-width: 140px;
+    }
+    
+    .btn-action {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-align: center;
+        text-decoration: none;
+    }
+    
+    .btn-confirm {
+        background: linear-gradient(135deg, #28a745, #34ce57);
+        color: white;
+    }
+    
+    .btn-confirm:hover {
+        background: linear-gradient(135deg, #218838, #28a745);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+    }
+    
+    .btn-reject {
+        background: linear-gradient(135deg, #dc3545, #e74c3c);
+        color: white;
+    }
+    
+    .btn-reject:hover {
+        background: linear-gradient(135deg, #c82333, #dc3545);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+    }
+    
+    .btn-chat {
+        background: linear-gradient(135deg, #25d366, #128c7e);
+        color: white;
+    }
+    
+    .btn-chat:hover {
+        background: linear-gradient(135deg, #1fb855, #0f7269);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+        color: white;
+    }
+    
+    .status-processed {
+        opacity: 0.7;
+    }
+    
+    .status-label {
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-align: center;
+        margin-top: 10px;
+    }
+    
+    .status-accepted {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .status-rejected {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .empty-state-icon {
+        font-size: 5rem;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+    
+    .alert-success {
+        background: #d4edda;
+        color: #155724;
+        padding: 15px 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        border-left: 4px solid #28a745;
+    }
+    
+    .alert-error {
+        background: #f8d7da;
+        color: #721c24;
+        padding: 15px 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        border-left: 4px solid #dc3545;
+    }
+    
+    @@media (max-width: 768px) {
+        .notification-body {
+            grid-template-columns: 1fr;
+            text-align: center;
+        }
+        
+        .crop-image-small {
+            margin: 0 auto;
+        }
+        
+        .action-buttons {
+            margin: 0 auto;
+        }
+    }
+</style>
+
+<div class="notifications-container">
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert-success">
+            ✅ @TempData["SuccessMessage"]
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert-error">
+            ❌ @TempData["ErrorMessage"]
+        </div>
+    }
+    
+    <div class="page-header">
+        <h2>🔔 Order Notifications</h2>
+        <p>آرڈر کی اطلاعات - Review and manage buyer orders</p>
+    </div>
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="notifications-grid">
+            @foreach (var notification in Model)
+            {
+                <div class="notification-card @(notification.IsRead ? "" : "unread")">
+                    <div class="notification-header">
+                        <div class="notification-time">
+                            📅 @notification.CreatedAt.ToString("MMM dd, yyyy - hh:mm tt")
+                        </div>
+                        <span class="notification-badge @(notification.IsRead ? "badge-read" : "badge-new")">
+                            @(notification.IsRead ? "Read" : "New Order!")
+                        </span>
+                    </div>
+                    
+                    <div class="notification-body">
+                        <div class="crop-image-small">
+                            @if (notification.Order.Crop.Images != null && notification.Order.Crop.Images.Any())
+                            {
+                                <img src="@notification.Order.Crop.Images.First().ImageUrl" alt="@notification.CropName" />
+                            }
+                            else
+                            {
+                                <span>🌾</span>
+                            }
+                        </div>
+                        
+                        <div class="notification-details">
+                            <div class="notification-title">
+                                🌾 @notification.CropName
+                            </div>
+                            <p style="color: #666; margin: 5px 0;">
+                                @notification.Message
+                            </p>
+                            
+                            <div class="notification-info">
+                                <div class="info-item">
+                                    <span>👤</span>
+                                    <span>Buyer: <strong>@notification.BuyerName</strong></span>
+                                </div>
+                                <div class="info-item">
+                                    <span>⚖️</span>
+                                    <span>Quantity: <strong>@notification.Quantity kg</strong></span>
+                                </div>
+                                <div class="info-item">
+                                    <span>💰</span>
+                                    <span>Total: <strong>Rs. @notification.TotalPrice.ToString("N0")</strong></span>
+                                </div>
+                            </div>
+                            
+                            @if (notification.Order.Status != "Pending")
+                            {
+                                <div class="status-label status-@notification.Order.Status.ToLower()">
+                                    @if (notification.Order.Status == "Accepted")
+                                    {
+                                        <text>✅ Accepted</text>
+                                    }
+                                    else if (notification.Order.Status == "Rejected")
+                                    {
+                                        <text>❌ Rejected</text>
+                                    }
+                                    else
+                                    {
+                                        @notification.Order.Status
+                                    }
+                                </div>
+                            }
+                        </div>
+                        
+                        @if (notification.Order.Status == "Pending")
+                        {
+                            <div class="action-buttons">
+                                <form asp-action="ConfirmOrder" asp-controller="Farmer" method="post" style="margin: 0;">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="orderId" value="@notification.OrderId" />
+                                    <input type="hidden" name="notificationId" value="@notification.Id" />
+                                    <button type="submit" class="btn-action btn-confirm">
+                                        ✅ Confirm
+                                    </button>
+                                </form>
+                                
+                                <form asp-action="RejectOrder" asp-controller="Farmer" method="post" style="margin: 0;">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="orderId" value="@notification.OrderId" />
+                                    <input type="hidden" name="notificationId" value="@notification.Id" />
+                                    <button type="submit" class="btn-action btn-reject">
+                                        ❌ Reject
+                                    </button>
+                                </form>
+                                
+                                <a href="@Url.Action("StartConversation", "Chat", new { receiverId = notification.Order.Buyer.ApplicationUserId })" 
+                                   class="btn-action btn-chat">
+                                    💬 Chat
+                                </a>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="action-buttons">
+                                <a href="@Url.Action("StartConversation", "Chat", new { receiverId = notification.Order.Buyer.ApplicationUserId })" 
+                                   class="btn-action btn-chat">
+                                    💬 Chat with Buyer
+                                </a>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <div class="empty-state-icon">🔔</div>
+            <h3>No Notifications</h3>
+            <p>You don't have any order notifications yet.</p>
+            <p style="color: #999;">ابھی تک کوئی اطلاعات نہیں ہیں۔</p>
+        </div>
+    }
+</div>

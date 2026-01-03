@@ -1,48 +1,331 @@
 ﻿@model HarvestHub.WebApp.ViewModels.VerifyOtpViewModel
-
 @{
+    ViewData["Title"] = "Verify OTP";
     Layout = null;
 }
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Verify OTP</title>
+    <meta charset="UTF-8" />
+    <title>@ViewData["Title"] - HarvestHub</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Prevent browser caching -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+        
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #075e54 0%, #128c7e 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Decorative patterns */
+        body::before {
+            content: '';
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background-image: radial-gradient(circle at 30% 40%, rgba(255,255,255,0.05) 2%, transparent 2%),
+                              radial-gradient(circle at 70% 60%, rgba(255,255,255,0.03) 2%, transparent 2%);
+            background-size: 80px 80px;
+            top: -100px;
+            left: -100px;
+            opacity: 0.4;
+        }
+        
+        body::after {
+            content: '';
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background-image: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 50px 50px;
+            bottom: -150px;
+            right: -150px;
+            opacity: 0.3;
+        }
+        
+        .otp-card {
+            position: relative;
+            z-index: 1;
+            background: #f5f5f5;
+            border-radius: 20px;
+            max-width: 450px;
+            width: 100%;
+            padding: 0;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            animation: slideUp 0.5s ease-out;
+        }
+        
+        @@keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .card-header {
+            background: white;
+            padding: 35px 30px 25px;
+            text-align: center;
+        }
+        
+        .logo-wrapper {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: white;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+        
+        .logo-wrapper img {
+            height: 65px;
+            width: auto;
+        }
+        
+        .card-header h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #075e54;
+            margin-bottom: 8px;
+        }
+        
+        .card-header p {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .otp-badge {
+            display: inline-block;
+            background: rgba(7, 94, 84, 0.1);
+            color: #075e54;
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-top: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: 1px solid rgba(7, 94, 84, 0.2);
+        }
+        
+        .card-body {
+            background: white;
+            padding: 30px;
+        }
+        
+        .info-message {
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            color: #2e7d32;
+            font-size: 0.9rem;
+        }
+        
+        .error-message {
+            background: #fee2e2;
+            border-left: 4px solid #ef4444;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            color: #dc2626;
+            font-size: 0.9rem;
+        }
+        
+        .form-group {
+            margin-bottom: 24px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+        }
+        
+        .otp-input {
+            width: 100%;
+            padding: 15px 18px;
+            border: 2px solid #e5e7eb;
+            border-radius: 14px;
+            font-size: 1.2rem;
+            text-align: center;
+            letter-spacing: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            outline: none;
+            background: #f9fafb;
+        }
+        
+        .otp-input:focus {
+            border-color: #128c7e;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(18, 140, 126, 0.1);
+        }
+        
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #075e54 0%, #128c7e 100%);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(7, 94, 84, 0.3);
+            margin-bottom: 15px;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(7, 94, 84, 0.4);
+        }
+        
+        .resend-section {
+            text-align: center;
+            padding: 15px 0;
+        }
+        
+        .resend-btn {
+            background: transparent;
+            color: #075e54;
+            border: 2px solid #075e54;
+            padding: 10px 24px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .resend-btn:hover {
+            background: #075e54;
+            color: white;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            background: #f9fafb;
+            color: #888;
+            font-size: 0.8rem;
+        }
+        
+        /* Responsive */
+        @@media (max-width: 640px) {
+            .otp-card {
+                margin: 10px;
+            }
+            
+            .card-header {
+                padding: 25px 20px 20px;
+            }
+            
+            .card-body {
+                padding: 25px 20px;
+            }
+            
+            .logo-wrapper {
+                width: 70px;
+                height: 70px;
+            }
+            
+            .logo-wrapper img {
+                height: 55px;
+            }
+        }
+    </style>
 </head>
-<body class="bg-green-50 min-h-screen flex items-center justify-center px-4 sm:px-6">
-
-    <div class="bg-white shadow-2xl rounded-2xl p-6 sm:p-10 w-full max-w-md space-y-6 animate-fade-in">
-        <h2 class="text-2xl sm:text-3xl font-bold text-center text-green-700">Enter OTP Code</h2>
-
-        <form asp-action="VerifyOtp" method="post" class="space-y-5">
-            <input type="hidden" asp-for="Email" />
-
-            <div>
-                <label asp-for="OtpCode" class="block text-gray-800 font-medium mb-1">OTP Code</label>
-                <input asp-for="OtpCode" placeholder="6-digit code"
-                       class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-green-500" />
-                <span asp-validation-for="OtpCode" class="text-red-600 text-sm mt-1 block"></span>
+<body>
+    <div class="otp-card">
+        <!-- Card Header -->
+        <div class="card-header">
+            <div class="logo-wrapper">
+                <img src="~/image/harvest/N__1_-removebg-preview.png" alt="HarvestHub Logo" />
             </div>
-
-            <div>
-                <button type="submit"
-                        class="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-semibold py-2 sm:py-3 px-4 rounded-lg transition-all duration-300 shadow-md text-sm sm:text-base">
+            <h2>🔐 Verify Your Account</h2>
+            <p>Enter the 6-digit code sent to your email</p>
+            <div class="otp-badge">Email Verification</div>
+        </div>
+        
+        <!-- Card Body -->
+        <div class="card-body">
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="info-message">@TempData["SuccessMessage"]</div>
+            }
+            
+            @if (!string.IsNullOrEmpty(ViewBag.ErrorMessage))
+            {
+                <div class="error-message">@ViewBag.ErrorMessage</div>
+            }
+            
+            <form asp-action="VerifyOtp" method="post">
+                @Html.AntiForgeryToken()
+                
+                <div class="form-group">
+                    <label asp-for="OtpCode">📧 OTP Code</label>
+                    <input asp-for="OtpCode" 
+                           type="text" 
+                           class="otp-input" 
+                           placeholder="000000" 
+                           maxlength="6"
+                           pattern="[0-9]{6}"
+                           required 
+                           autofocus />
+                </div>
+                
+                <button type="submit" class="submit-btn">
                     Verify OTP
                 </button>
+            </form>
+            
+            <div class="resend-section">
+                <form asp-action="ResendOtp" method="post" style="display: inline;">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="email" value="@TempData.Peek("Email")" />
+                    <button type="submit" class="resend-btn">
+                        🔄 Resend OTP
+                    </button>
+                </form>
             </div>
-        </form>
-
-        <form asp-action="ResendOtp" method="post" class="mt-3">
-            <input type="hidden" name="email" value="@Model.Email" />
-            <button type="submit"
-                    class="w-full sm:w-auto bg-gray-200 hover:bg-gray-300 text-green-700 font-semibold py-2 sm:py-3 px-4 rounded-lg transition-all duration-300 shadow-md text-sm sm:text-base">
-                Resend OTP
-            </button>
-        </form>
-
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            &copy; @DateTime.Now.Year HarvestHub. All rights reserved.
+        </div>
     </div>
-
 </body>
 </html>

@@ -1,61 +1,356 @@
 ﻿@model HarvestHub.WebApp.ViewModels.LoginViewModel
 @{
     ViewData["Title"] = "Admin Login";
+    Layout = null;
 }
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta charset="UTF-8" />
     <title>@ViewData["Title"] - HarvestHub</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- Prevent browser caching to avoid back button issues -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+        
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #075e54 0%, #128c7e 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Decorative leaf patterns */
+        body::before {
+            content: '';
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background-image: radial-gradient(circle at 30% 40%, rgba(255,255,255,0.05) 2%, transparent 2%),
+                              radial-gradient(circle at 70% 60%, rgba(255,255,255,0.03) 2%, transparent 2%);
+            background-size: 80px 80px;
+            top: -100px;
+            left: -100px;
+            opacity: 0.4;
+            transform: rotate(-30deg);
+        }
+        
+        body::after {
+            content: '';
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background-image: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 50px 50px;
+            bottom: -150px;
+            right: -150px;
+            opacity: 0.3;
+        }
+        
+        .login-card {
+            position: relative;
+            z-index: 1;
+            background: #f5f5f5;
+            border-radius: 20px;
+            max-width: 420px;
+            width: 100%;
+            padding: 0;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            animation: slideUp 0.5s ease-out;
+        }
+        
+        @@keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .card-header {
+            background: white;
+            padding: 35px 30px 25px;
+            text-align: center;
+        }
+        
+        .logo-wrapper {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: white;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+        
+        .logo-wrapper img {
+            height: 65px;
+            width: auto;
+        }
+        
+       .card-header h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #075e54;
+            margin-bottom: 8px;
+        }
+        
+        .card-header p {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .admin-badge {
+            display: inline-block;
+            background: rgba(7, 94, 84, 0.1);
+            color: #075e54;
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-top: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: 1px solid rgba(7, 94, 84, 0.2);
+        }
+        
+        .card-body {
+            background: white;
+            padding: 30px;
+        }
+        
+        .validation-summary {
+            background: #fee2e2;
+            border-left: 4px solid #ef4444;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            color: #dc2626;
+            font-size: 0.9rem;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .input-wrapper {
+            position: relative;
+        }
+        
+        .form-group input[type="email"],
+        .form-group input[type="password"] {
+            width: 100%;
+            padding: 13px 16px 13px 45px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+            outline: none;
+            background: #fafafa;
+        }
+        
+        .form-group input:focus {
+            border-color: #128c7e;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(18, 140, 126, 0.1);
+        }
+        
+        .form-group input::placeholder {
+            color: #999;
+        }
+        
+        .validation-error {
+            color: #dc2626;
+            font-size: 0.8rem;
+            margin-top: 5px;
+            display: block;
+        }
+        
+        .remember-forgot {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        
+        .remember-me {
+            display: flex;
+            align-items: center;
+            font-size: 0.85rem;
+            color: #555;
+        }
+        
+        .remember-me input {
+            margin-right: 7px;
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            accent-color: #075e54;
+        }
+        
+        .forgot-link {
+            color: #075e54;
+            font-size: 0.85rem;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        
+        .forgot-link:hover {
+            color: #128c7e;
+            text-decoration: underline;
+        }
+        
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #075e54 0%, #128c7e 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(7, 94, 84, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(7, 94, 84, 0.4);
+        }
+        
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            background: #f5f5f5;
+            color: #888;
+            font-size: 0.8rem;
+        }
+        
+        /* Responsive */
+        @@media (max-width: 640px) {
+            .login-card {
+                margin: 10px;
+            }
+            
+            .card-header {
+                padding: 25px 20px 20px;
+            }
+            
+            .card-header h2 {
+                font-size: 1.3rem;
+            }
+            
+            .card-body {
+                padding: 25px 20px;
+            }
+            
+            .logo-wrapper {
+                width: 70px;
+                height: 70px;
+            }
+            
+            .logo-wrapper img {
+                height: 55px;
+            }
+        }
+    </style>
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen">
-
-    <div class="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
-        <!-- Logo / Title -->
-        <div class="text-center mb-6">
-            <img src="~/image/harvest/N__1_-removebg-preview.png" alt="HarvestHub" class="h-16 mx-auto mb-3" />
-            <h1 class="text-2xl font-bold text-yellow-700">Admin Login</h1>
-            <p class="text-gray-500 text-sm">Only authorized admins can access this panel</p>
+<body>
+    <div class="login-card">
+        <!-- Card Header -->
+        <div class="card-header">
+            <div class="logo-wrapper">
+                <img src="~/image/harvest/N__1_-removebg-preview.png" alt="HarvestHub Logo" />
+            </div>
+            <h2>🛡️ Admin Portal</h2>
+            <p>Select your account type to continue</p>
+            <div class="admin-badge">Authorized Access Only</div>
         </div>
-
-        <!-- Validation -->
-        <div asp-validation-summary="All" class="text-red-600 text-sm mb-4"></div>
-
-        <!-- Form -->
-        <form asp-action="AdminLogin" method="post" class="space-y-5">
-            <div>
-                <label asp-for="Email" class="block text-sm font-medium text-gray-700 mb-1"></label>
-                <input asp-for="Email" type="email" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-500" placeholder="admin@harvesthub.com" />
-                <span asp-validation-for="Email" class="text-red-500 text-xs"></span>
-            </div>
-
-            <div>
-                <label asp-for="Password" class="block text-sm font-medium text-gray-700 mb-1"></label>
-                <input asp-for="Password" type="password" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-500" placeholder="••••••••" />
-                <span asp-validation-for="Password" class="text-red-500 text-xs"></span>
-            </div>
-
-            <div class="flex items-center justify-between">
-                <label class="flex items-center text-sm text-gray-600">
-                    <input asp-for="RememberMe" class="mr-2 rounded border-gray-300" />
-                    Remember me
-                </label>
-                <a asp-action="ForgotPassword" asp-controller="Account" class="text-sm text-yellow-700 hover:underline">Forgot password?</a>
-            </div>
-
-            <button type="submit" class="w-full bg-yellow-700 hover:bg-yellow-800 text-white py-2 px-4 rounded-lg font-semibold transition duration-200">
-                Sign In
-            </button>
-        </form>
-
+        
+        <!-- Card Body -->
+        <div class="card-body">
+            @if (ViewData.ModelState.ErrorCount > 0)
+            {
+                <div class="validation-summary" asp-validation-summary="All"></div>
+            }
+            
+            <form asp-action="AdminLogin" method="post">
+                @Html.AntiForgeryToken()
+                
+                <div class="form-group">
+                    <label asp-for="Email">📧 Email Address</label>
+                    <div class="input-wrapper">
+                        <input asp-for="Email" type="email" placeholder="admin@harvesthub.com" />
+                    </div>
+                    <span asp-validation-for="Email" class="validation-error"></span>
+                </div>
+                
+                <div class="form-group">
+                    <label asp-for="Password">🔒 Password</label>
+                    <div class="input-wrapper">
+                        <input asp-for="Password" type="password" placeholder="Enter your password" />
+                    </div>
+                    <span asp-validation-for="Password" class="validation-error"></span>
+                </div>
+                
+                <div class="remember-forgot">
+                    <label class="remember-me">
+                        <input asp-for="RememberMe" type="checkbox" />
+                        Remember me
+                    </label>
+                    <a asp-action="ForgotPassword" asp-controller="Account" class="forgot-link">Forgot Password?</a>
+                </div>
+                
+                <button type="submit" class="submit-btn">
+                    <span>Login as Admin</span>
+                </button>
+            </form>
+        </div>
+        
         <!-- Footer -->
-        <div class="text-center mt-6">
-            <p class="text-xs text-gray-500">&copy; @DateTime.Now.Year HarvestHub. All rights reserved.</p>
+        <div class="footer">
+            &copy; @DateTime.Now.Year HarvestHub. All rights reserved.
         </div>
     </div>
-
 </body>
 </html>

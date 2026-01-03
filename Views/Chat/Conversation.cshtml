@@ -1,0 +1,444 @@
+@model HarvestHub.WebApp.Models.Conversation
+@{
+    ViewData["Title"] = "Chat";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var currentUserId = ViewBag.CurrentUserId as string;
+    var currentUserName = ViewBag.CurrentUserName as string;
+    var otherUser = Model.BuyerId == currentUserId ? Model.Farmer : Model.Buyer;
+    var otherInitial = otherUser?.FullName?.Substring(0, 1).ToUpper() ?? "?";
+}
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+    
+    .chat-app {
+        max-width: 800px;
+        margin: 0 auto;
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        height: 80vh;
+        min-height: 500px;
+    }
+    
+    /* Header */
+    .chat-header {
+        background: linear-gradient(135deg, #075e54, #128c7e);
+        color: white;
+        padding: 15px 20px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        flex-shrink: 0;
+    }
+    
+    .back-arrow {
+        font-size: 1.3rem;
+        text-decoration: none;
+        color: white;
+        padding: 5px;
+    }
+    
+    .header-avatar {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 1.2rem;
+    }
+    
+    .header-info {
+        flex: 1;
+    }
+    
+    .header-name {
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 2px;
+    }
+    
+    .header-crop {
+        font-size: 0.85rem;
+        opacity: 0.9;
+    }
+    
+    /* Messages Area */
+    .messages-area {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px;
+        background: #e5ddd5;
+        background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    
+    .message-wrapper {
+        display: flex;
+        margin-bottom: 10px;
+    }
+    
+    .message-wrapper.sent {
+        justify-content: flex-end;
+    }
+    
+    .message-wrapper.received {
+        justify-content: flex-start;
+    }
+    
+    .message-bubble {
+        max-width: 65%;
+        padding: 10px 15px;
+        border-radius: 18px;
+        position: relative;
+        word-wrap: break-word;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+    
+    .message-wrapper.sent .message-bubble {
+        background: #dcf8c6;
+        border-bottom-right-radius: 5px;
+    }
+    
+    .message-wrapper.received .message-bubble {
+        background: white;
+        border-bottom-left-radius: 5px;
+    }
+    
+    .message-text {
+        font-size: 0.95rem;
+        line-height: 1.4;
+        color: #303030;
+    }
+    
+    .message-time {
+        font-size: 0.7rem;
+        color: #999;
+        text-align: right;
+        margin-top: 5px;
+    }
+    
+    .message-wrapper.sent .message-time {
+        color: #7a9c7a;
+    }
+    
+    /* RTL Support for Urdu */
+    .message-bubble.rtl {
+        direction: rtl;
+        text-align: right;
+    }
+    
+    /* Input Area */
+    .input-area {
+        background: #f0f2f5;
+        padding: 15px 20px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-shrink: 0;
+    }
+    
+    .message-input {
+        flex: 1;
+        border: none;
+        border-radius: 25px;
+        padding: 12px 20px;
+        font-size: 1rem;
+        outline: none;
+        background: white;
+    }
+    
+    .message-input:focus {
+        box-shadow: 0 0 0 2px rgba(7, 94, 84, 0.2);
+    }
+    
+    .send-btn {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        border: none;
+        background: linear-gradient(135deg, #075e54, #25d366);
+        color: white;
+        font-size: 1.3rem;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .send-btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
+    }
+    
+    .send-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+    
+    /* Date Separator */
+    .date-separator {
+        text-align: center;
+        margin: 20px 0;
+    }
+    
+    .date-separator span {
+        background: rgba(225, 245, 254, 0.9);
+        padding: 6px 15px;
+        border-radius: 10px;
+        font-size: 0.8rem;
+        color: #54656f;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+    
+    /* Typing Indicator */
+    .typing-indicator {
+        display: none;
+        padding: 10px;
+        color: #667781;
+        font-size: 0.85rem;
+        font-style: italic;
+    }
+    
+    /* Scrollbar */
+    .messages-area::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    .messages-area::-webkit-scrollbar-thumb {
+        background: rgba(0,0,0,0.2);
+        border-radius: 3px;
+    }
+    
+    /* Online Status */
+    .online-dot {
+        width: 10px;
+        height: 10px;
+        background: #25d366;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 5px;
+    }
+</style>
+
+<div class="container py-3">
+    <div class="chat-app">
+        <!-- Header -->
+        <div class="chat-header">
+            <a href="@Url.Action("MyConversations", "Chat")" class="back-arrow">←</a>
+            
+            <div class="header-avatar">
+                @otherInitial
+            </div>
+            
+            <div class="header-info">
+                <div class="header-name">@(otherUser?.FullName ?? otherUser?.Email ?? "User")</div>
+                @if (Model.Crop != null)
+                {
+                    <div class="header-crop">🌾 @Model.Crop.Name - Rs. @Model.Crop.PricePerUnit/@Model.Crop.Unit</div>
+                }
+            </div>
+        </div>
+
+        <!-- Messages -->
+        <div class="messages-area" id="messagesArea">
+            @if (Model.Messages != null && Model.Messages.Any())
+            {
+                var messagesByDate = Model.Messages.GroupBy(m => m.SentAt.Date);
+                
+                @foreach (var dateGroup in messagesByDate)
+                {
+                    <div class="date-separator">
+                        <span>
+                            @if (dateGroup.Key == DateTime.Today)
+                            {
+                                @:Today / آج
+                            }
+                            else if (dateGroup.Key == DateTime.Today.AddDays(-1))
+                            {
+                                @:Yesterday / کل
+                            }
+                            else
+                            {
+                                @dateGroup.Key.ToString("MMM dd, yyyy")
+                            }
+                        </span>
+                    </div>
+                    
+                    @foreach (var msg in dateGroup)
+                    {
+                        var isOwn = msg.SenderId == currentUserId;
+                        var isUrdu = System.Text.RegularExpressions.Regex.IsMatch(msg.Message, @"[\u0600-\u06FF]");
+                        
+                        <div class="message-wrapper @(isOwn ? "sent" : "received")" data-id="@msg.Id">
+                            <div class="message-bubble @(isUrdu ? "rtl" : "")">
+                                <div class="message-text">@msg.Message</div>
+                                <div class="message-time">
+                                    @msg.SentAt.ToString("HH:mm")
+                                    @if (isOwn)
+                                    {
+                                        <span style="margin-left: 5px;">✓@(msg.IsRead ? "✓" : "")</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            }
+            else
+            {
+                <div class="date-separator">
+                    <span>Start the conversation! / بات چیت شروع کریں!</span>
+                </div>
+            }
+        </div>
+
+        <!-- Input -->
+        <div class="input-area">
+            <input type="text" 
+                   id="messageInput" 
+                   class="message-input" 
+                   placeholder="Type a message... / پیغام لکھیں..."
+                   maxlength="1000"
+                   autocomplete="off" />
+            <button id="sendBtn" class="send-btn" title="Send">
+                ➤
+            </button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+    <script>
+        const conversationId = @Model.Id;
+        const currentUserId = '@currentUserId';
+        
+        // SignalR connection
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/chatHub")
+            .withAutomaticReconnect()
+            .build();
+
+        // Receive message
+        connection.on("ReceiveMessage", function (data) {
+            if (data.senderId !== currentUserId) {
+                appendMessage(data.message, false, data.sentAt, data.id);
+                playNotificationSound();
+            }
+        });
+
+        // Start connection
+        connection.start()
+            .then(() => {
+                console.log("✅ Connected to chat");
+                connection.invoke("JoinConversation", conversationId);
+            })
+            .catch(err => console.error("❌ Connection error:", err));
+
+        // Send message
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            const sendBtn = document.getElementById('sendBtn');
+            sendBtn.disabled = true;
+            
+            fetch('@Url.Action("SendMessage", "Chat")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: `conversationId=${conversationId}&message=${encodeURIComponent(message)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    appendMessage(message, true, new Date().toISOString(), data.messageId);
+                    input.value = '';
+                } else {
+                    alert('Error: ' + (data.error || 'Failed to send'));
+                }
+            })
+            .catch(err => {
+                console.error('Send error:', err);
+                alert('Failed to send message');
+            })
+            .finally(() => {
+                sendBtn.disabled = false;
+                input.focus();
+            });
+        }
+
+        // Append message to chat
+        function appendMessage(text, isOwn, time, id) {
+            const container = document.getElementById('messagesArea');
+            
+            // Check if already exists
+            if (document.querySelector(`.message-wrapper[data-id="${id}"]`)) return;
+            
+            const isUrdu = /[\u0600-\u06FF]/.test(text);
+            const timeStr = new Date(time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+            
+            const wrapper = document.createElement('div');
+            wrapper.className = `message-wrapper ${isOwn ? 'sent' : 'received'}`;
+            wrapper.dataset.id = id;
+            
+            wrapper.innerHTML = `
+                <div class="message-bubble ${isUrdu ? 'rtl' : ''}">
+                    <div class="message-text">${escapeHtml(text)}</div>
+                    <div class="message-time">${timeStr}${isOwn ? ' <span style="margin-left: 5px;">✓</span>' : ''}</div>
+                </div>
+            `;
+            
+            container.appendChild(wrapper);
+            scrollToBottom();
+        }
+
+        // Escape HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Scroll to bottom
+        function scrollToBottom() {
+            const container = document.getElementById('messagesArea');
+            container.scrollTop = container.scrollHeight;
+        }
+        
+        // Simple notification sound
+        function playNotificationSound() {
+            // Optional: Add notification sound
+        }
+
+        // Event listeners
+        document.getElementById('sendBtn').addEventListener('click', sendMessage);
+        document.getElementById('messageInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Initial scroll
+        scrollToBottom();
+
+        // Cleanup
+        window.addEventListener('beforeunload', () => {
+            connection.invoke("LeaveConversation", conversationId);
+        });
+    </script>
+}

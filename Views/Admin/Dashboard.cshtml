@@ -1,63 +1,211 @@
-﻿@{
+﻿@using Microsoft.AspNetCore.Identity
+@using HarvestHub.WebApp.Models
+@inject UserManager<ApplicationUser> _userManager
+@{
     ViewData["Title"] = "Admin Dashboard";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var user = await _userManager.GetUserAsync(User);
 }
-<h1 class="text-2xl font-bold text-yellow-700 mb-6">Admin Dashboard</h1>
 
-<div class="grid grid-cols-2 md:grid-cols-3 gap-6">
-    <!-- Farmers -->
-    <div class="bg-white shadow rounded-lg p-6 text-center">
-        <a asp-controller="Admin" asp-action="ManageUsers" class="block bg-white shadow rounded-lg p-6 text-center hover:bg-yellow-50 transition">
-            <h2 class="text-xl font-semibold">Farmers</h2>
-            <p class="text-3xl font-bold text-yellow-700">@ViewBag.TotalFarmers</p>
+<style>
+    .admin-dashboard {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    /* Welcome Card */
+    .welcome-card {
+        background: linear-gradient(135deg, #075e54, #128c7e);
+        color: white;
+        border-radius: 20px;
+        padding: 30px;
+        margin-bottom: 25px;
+        box-shadow: 0 10px 30px rgba(7, 94, 84, 0.3);
+    }
+    
+    .welcome-card h2 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 15px;
+    }
+    
+    .welcome-card p {
+        opacity: 0.9;
+        margin-bottom: 5px;
+    }
+    
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+    
+    .user-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        font-weight: bold;
+    }
+    
+    /* Quick Actions */
+    .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 15px;
+        margin-bottom: 30px;
+    }
+    
+    .action-card {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        text-decoration: none;
+        color: #333;
+        border: 2px solid transparent;
+    }
+    
+    .action-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        border-color: #128c7e;
+        color: #075e54;
+    }
+    
+    .action-icon {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+    }
+    
+    .action-title {
+        font-weight: 600;
+        font-size: 1rem;
+    }
+    
+    .action-subtitle {
+        font-size: 0.8rem;
+        color: #666;
+        margin-top: 5px;
+    }
+    
+    /* Stats Section */
+    .stats-section {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .section-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 15px;
+    }
+    
+    .stat-card {
+        background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #075e54;
+    }
+    
+    .stat-label {
+        color: #666;
+        font-size: 0.9rem;
+        margin-top: 5px;
+    }
+</style>
+
+<div class="admin-dashboard">
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <a asp-controller="Admin" asp-action="ManageUsers" class="action-card">
+            <div class="action-icon">👥</div>
+            <div class="action-title">Manage Users</div>
+            <div class="action-subtitle">یوزرز کو منظم کریں</div>
+        </a>
+        <a asp-controller="Admin" asp-action="ManageProducts" class="action-card">
+            <div class="action-icon">📦</div>
+            <div class="action-title">Manage Products</div>
+            <div class="action-subtitle">پراڈکٹس کو منظم کریں</div>
+        </a>
+        <a asp-controller="Admin" asp-action="VerifyDocuments" class="action-card">
+            <div class="action-icon">📄</div>
+            <div class="action-title">Verify Documents</div>
+            <div class="action-subtitle">دستاویزات کی تصدیق</div>
+        </a>
+        <a asp-controller="Admin" asp-action="ManageLabs" class="action-card">
+            <div class="action-icon">🔬</div>
+            <div class="action-title">Manage Labs</div>
+            <div class="action-subtitle">لیبز کو منظم کریں</div>
+        </a>
+        <a href="@Url.Action("Index", "MarketRates")" class="action-card">
+            <div class="action-icon">📈</div>
+            <div class="action-title">Market Rates</div>
+            <div class="action-subtitle">منڈی ریٹ</div>
+        </a>
+        <a href="#" onclick="event.preventDefault(); document.getElementById('logoutForm').submit();" class="action-card">
+            <div class="action-icon">🚪</div>
+            <div class="action-title">Logout</div>
+            <div class="action-subtitle">لاگ آؤٹ</div>
         </a>
     </div>
 
-    <!-- Buyers -->
-    <div class="bg-white shadow rounded-lg p-6 text-center">
-        <a asp-controller="Admin" asp-action="ManageUsers" class="block bg-white shadow rounded-lg p-6 text-center hover:bg-yellow-50 transition">
-            <h2 class="text-xl font-semibold">Buyers</h2>
-            <p class="text-3xl font-bold text-yellow-700">@ViewBag.TotalBuyers</p>
-        </a>
+    <!-- Stats Section -->
+    <div class="stats-section">
+        <div class="section-title">📊 Platform Stats / پلیٹ فارم کے اعداد و شمار</div>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number">@ViewBag.TotalFarmers</div>
+                <div class="stat-label">Farmers / کسان</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">@ViewBag.TotalBuyers</div>
+                <div class="stat-label">Buyers / خریدار</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">@ViewBag.TotalCrops</div>
+                <div class="stat-label">Crops / فصلیں</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">@ViewBag.TotalLabs</div>
+                <div class="stat-label">Labs / لیبز</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">@ViewBag.PendingDocs</div>
+                <div class="stat-label">Pending Docs / زیر التواء</div>
+            </div>
+        </div>
     </div>
 
-    <!-- Crops -->
-    <div class="bg-white shadow rounded-lg p-6 text-center">
-        <a asp-controller="Admin" asp-action="ManageProducts" class="block bg-white shadow rounded-lg p-6 text-center hover:bg-yellow-50 transition">
-            <h2 class="text-xl font-semibold">Crops</h2>
-            <p class="text-3xl font-bold text-yellow-700">@ViewBag.TotalCrops</p>
-        </a>
-    </div>
-
-    <!-- Labs -->
-    <div class="bg-white shadow rounded-lg p-6 text-center">
-        <a asp-controller="Admin" asp-action="ManageLabs" class="block bg-white shadow rounded-lg p-6 text-center hover:bg-yellow-50 transition">
-            <h2 class="text-xl font-semibold">Labs</h2>
-            <p class="text-3xl font-bold text-yellow-700">@ViewBag.TotalLabs</p>
-        </a>
-    </div>
-
-    <!-- Pending Documents -->
-    <div class="bg-white shadow rounded-lg p-6 text-center">
-        <a asp-controller="Admin" asp-action="VerifyDocuments" class="block bg-white shadow rounded-lg p-6 text-center hover:bg-yellow-50 transition">
-            <h2 class="text-xl font-semibold">Pending Docs</h2>
-            <p class="text-3xl font-bold text-yellow-700">@ViewBag.PendingDocs</p>
-        </a>
-    </div>
-
-    <!-- Approved Documents -->
-    <div class="bg-white shadow rounded-lg p-6 text-center">
-        <a asp-controller="Admin" asp-action="VerifyDocuments" class="block bg-white shadow rounded-lg p-6 text-center hover:bg-yellow-50 transition">
-            <h2 class="text-xl font-semibold">Approved Docs</h2>
-            <p class="text-3xl font-bold text-green-600">@ViewBag.ApprovedDocs</p>
-        </a>
-    </div>
-
-    <!-- Rejected Documents -->
-    <div class="bg-white shadow rounded-lg p-6 text-center">
-        <a asp-controller="Admin" asp-action="VerifyDocuments" class="block bg-white shadow rounded-lg p-6 text-center hover:bg-yellow-50 transition">
-            <h2 class="text-xl font-semibold">Rejected Docs</h2>
-            <p class="text-3xl font-bold text-red-600">@ViewBag.RejectedDocs</p>
-        </a>
-    </div>
+    <!-- Hidden Logout Form -->
+    <form id="logoutForm" asp-controller="Account" asp-action="Logout" method="post" style="display: none;">
+        @Html.AntiForgeryToken()
+    </form>
 </div>

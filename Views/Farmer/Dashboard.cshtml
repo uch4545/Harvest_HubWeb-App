@@ -4,17 +4,281 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="max-w-3xl mx-auto mt-10 bg-white shadow-lg rounded-lg p-6 space-y-4">
-    <h2 class="text-2xl font-bold text-green-700">Welcome, @Model.FullName!</h2>
+<style>
+    .farmer-dashboard {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    /* Welcome Card */
+    .welcome-card {
+        background: linear-gradient(135deg, #075e54, #128c7e);
+        color: white;
+        border-radius: 20px;
+        padding: 30px;
+        margin-bottom: 25px;
+        box-shadow: 0 10px 30px rgba(7, 94, 84, 0.3);
+    }
+    
+    .welcome-card h2 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 15px;
+    }
+    
+    .welcome-card p {
+        opacity: 0.9;
+        margin-bottom: 5px;
+    }
+    
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+    
+    .user-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        font-weight: bold;
+    }
+    
+    /* Quick Actions */
+    .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 15px;
+        margin-bottom: 30px;
+    }
+    
+    .action-card {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        text-decoration: none;
+        color: #333;
+        border: 2px solid transparent;
+    }
+    
+    .action-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        border-color: #128c7e;
+        color: #075e54;
+    }
+    
+    .action-icon {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+    }
+    
+    .action-title {
+        font-weight: 600;
+        font-size: 1rem;
+    }
+    
+    .action-subtitle {
+        font-size: 0.8rem;
+        color: #666;
+        margin-top: 5px;
+    }
+    
+    .notification-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: #ff6b35;
+        color: white;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 700;
+        animation: pulse 2s infinite;
+    }
+    
+    @@keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+    }
+    
+    .action-card {
+        position: relative;
+    }
+    
+    /* Stats Section */
+    .stats-section {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .section-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 15px;
+    }
+    
+    .stat-card {
+        background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #075e54;
+    }
+    
+    .stat-label {
+        color: #666;
+        font-size: 0.9rem;
+        margin-top: 5px;
+    }
+    
+    /* Messages Floating Button 
+    .messages-floating-btn {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #075e54, #25d366);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4);
+        text-decoration: none;
+        transition: all 0.3s ease;
+        z-index: 1000;
+    }
+    */
+    .messages-floating-btn:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 25px rgba(37, 211, 102, 0.5);
+        color: white;
+    }
+</style>
 
-    <div class="text-gray-800">
-        <p><strong>Email:</strong> @Model.Email</p>
-        <p><strong>CNIC:</strong> @Model.CNIC</p>
+<div class="farmer-dashboard">
+    <!-- Welcome Card -->
+    <div class="welcome-card">
+        <div class="user-info">
+            <div class="user-avatar">
+                @(Model.FullName?.Substring(0, 1).ToUpper() ?? "F")
+            </div>
+            <div>
+                <h2>Welcome, @Model.FullName! 🌾</h2>
+                <p><strong>Email:</strong> @Model.Email</p>
+                <p><strong>CNIC:</strong> @Model.CNIC</p>
+            </div>
+        </div>
     </div>
 
-    <form asp-controller="Account" asp-action="Logout" method="post">
-      
-    </form>
-   
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <a href="@Url.Action("MyCrops", "Farmer")" class="action-card">
+            <div class="action-icon">🌾</div>
+            <div class="action-title">My Crops</div>
+            <div class="action-subtitle">میری فصلیں</div>
+        </a>
+        <a href="@Url.Action("Notifications", "Farmer")" class="action-card">
+            @if (ViewBag.UnreadNotifications != null && ViewBag.UnreadNotifications > 0)
+            {
+                <span class="notification-badge">@ViewBag.UnreadNotifications</span>
+            }
+            <div class="action-icon">🔔</div>
+            <div class="action-title">Notifications</div>
+            <div class="action-subtitle">اطلاعات</div>
+        </a>
+        <a href="@Url.Action("AddCrop", "Farmer")" class="action-card">
+            <div class="action-icon">➕</div>
+            <div class="action-title">Add Crop</div>
+            <div class="action-subtitle">فصل شامل کریں</div>
+        </a>
+        <a href="@Url.Action("MyConversations", "Chat")" class="action-card">
+            <div class="action-icon">💬</div>
+            <div class="action-title">Messages</div>
+            <div class="action-subtitle">پیغامات</div>
+        </a>
+        <a href="@Url.Action("Index", "MarketRates")" class="action-card">
+            <div class="action-icon">📈</div>
+            <div class="action-title">Market Rates</div>
+            <div class="action-subtitle">منڈی ریٹ</div>
+        </a>
+        <a href="@Url.Action("MyReports", "Farmer")" class="action-card">
+            <div class="action-icon">📊</div>
+            <div class="action-title">Lab Reports</div>
+            <div class="action-subtitle">لیب رپورٹس</div>
+        </a>
+        <a href="#" onclick="event.preventDefault(); document.getElementById('logoutForm').submit();" class="action-card">
+            <div class="action-icon">🚪</div>
+            <div class="action-title">Logout</div>
+            <div class="action-subtitle">لاگ آؤٹ</div>
+        </a>
+    </div>
 
+    <!-- Stats Section -->
+    <div class="stats-section">
+        <div class="section-title">📊 Quick Stats / فوری اعداد و شمار</div>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number">@ViewBag.TotalCrops</div>
+                <div class="stat-label">Total Crops / کل فصلیں</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">@ViewBag.ActiveListings</div>
+                <div class="stat-label">Active Listings / فعال</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">@ViewBag.Messages</div>
+                <div class="stat-label">Messages / پیغامات</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">@ViewBag.LabReports</div>
+                <div class="stat-label">Lab Reports / رپورٹس</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Chat Button -->
+    <a href="@Url.Action("MyConversations", "Chat")" class="messages-floating-btn" title="Messages">
+        💬
+    </a>
+
+    <!-- Hidden Logout Form -->
+    <form id="logoutForm" asp-controller="Account" asp-action="Logout" method="post" style="display: none;">
+        @Html.AntiForgeryToken()
+    </form>
 </div>

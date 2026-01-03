@@ -1,121 +1,410 @@
 ﻿@model IEnumerable<HarvestHub.WebApp.Models.MarketRate>
-
 @{
     ViewData["Title"] = "Market Rates";
-}
-
-@if (TempData["Success"] != null)
-{
-    <div class="alert alert-success">@TempData["Success"]</div>
-}
-@if (TempData["Error"] != null)
-{
-    <div class="alert alert-danger">@TempData["Error"]</div>
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <style>
-    body {
-        background: linear-gradient(to right, #e0f7fa, #e8f5e9);
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        margin: 0;
-        padding: 0;
-    }
-
-    .market-container {
+    .market-rates-container {
         max-width: 1200px;
-        margin: 15px auto;
-        background-color: #ffffff;
-        border-radius: 15px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-        padding: 30px;
+        margin: 0 auto;
+        padding: 20px;
     }
-
-    h2 {
-        color: #2e7d32;
-        font-weight: 600;
-        text-align: center;
-        margin-bottom: 25px;
-        text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
-    }
-
-    .btn-primary {
-        background-color: #43a047;
-        border: none;
-        border-radius: 8px;
-        padding: 10px 20px;
-        transition: background-color 0.3s ease;
-    }
-
-        .btn-primary:hover {
-            background-color: #2e7d32;
-        }
-
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        border-radius: 10px;
-        overflow: hidden;
-    }
-
-    thead {
-        background-color: #43a047;
+    
+    /* Header */
+    .rates-header {
+        background: linear-gradient(135deg, #075e54, #128c7e);
         color: white;
-        font-size: 1.1em;
-    }
-
-    th, td {
-        padding: 14px 20px;
-        text-align: left;
-    }
-
-    tbody tr:nth-child(odd) {
-        background-color: #f1f8e9;
-    }
-
-    tbody tr:nth-child(even) {
-        background-color: #ffffff;
-    }
-
-    tbody tr:hover {
-        background-color: #dcedc8;
-        transition: 0.3s;
-    }
-
-    .update-btn-container {
-        text-align: center;
+        border-radius: 20px;
+        padding: 30px;
         margin-bottom: 25px;
+        box-shadow: 0 10px 30px rgba(7, 94, 84, 0.3);
+        text-align: center;
+    }
+    
+    .rates-header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+    
+    .rates-header p {
+        opacity: 0.9;
+        margin-bottom: 20px;
+    }
+    
+    .update-btn {
+        background: rgba(255,255,255,0.2);
+        border: 2px solid white;
+        color: white;
+        padding: 12px 30px;
+        border-radius: 25px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .update-btn:hover {
+        background: white;
+        color: #075e54;
+    }
+    
+    /* Filter Tabs */
+    .filter-tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 25px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .filter-tab {
+        background: white;
+        border: 2px solid #e0e0e0;
+        padding: 10px 20px;
+        border-radius: 25px;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-weight: 500;
+    }
+    
+    .filter-tab:hover, .filter-tab.active {
+        background: #075e54;
+        color: white;
+        border-color: #075e54;
+    }
+    
+    /* Search */
+    .search-container {
+        max-width: 500px;
+        margin: 0 auto 25px;
+    }
+    
+    .search-input {
+        width: 100%;
+        padding: 15px 25px;
+        border: 2px solid #e0e0e0;
+        border-radius: 30px;
+        font-size: 1rem;
+        outline: none;
+        transition: border-color 0.3s;
+    }
+    
+    .search-input:focus {
+        border-color: #128c7e;
+    }
+    
+    /* Rates Grid */
+    .rates-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
+    }
+    
+    .rate-card {
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        position: relative;
+    }
+    
+    .rate-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+    }
+    
+    .rate-card-header {
+        padding: 20px;
+        background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+        border-bottom: 1px solid #e0e0e0;
+    }
+    
+    .crop-icon {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+    }
+    
+    .crop-name {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 3px;
+    }
+    
+    .crop-name-urdu {
+        font-size: 1rem;
+        color: #666;
+        direction: rtl;
+    }
+    
+    .rate-card-body {
+        padding: 20px;
+    }
+    
+    .rate-price {
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: #075e54;
+        margin-bottom: 5px;
+    }
+    
+    .rate-unit {
+        color: #666;
+        font-size: 0.9rem;
+        margin-bottom: 15px;
+    }
+    
+    .rate-updated {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        color: #888;
+        font-size: 0.8rem;
+    }
+    
+    .rate-updated-dot {
+        width: 8px;
+        height: 8px;
+        background: #25d366;
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+    }
+    
+    @@keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+    
+    /* Category Badge */
+    .category-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: rgba(7, 94, 84, 0.9);
+        color: white;
+        padding: 4px 10px;
+        border-radius: 15px;
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+    
+    /* Alerts */
+    .alert-success {
+        background: #d4edda;
+        color: #155724;
+        border: none;
+        border-radius: 10px;
+        padding: 15px 20px;
+        margin-bottom: 20px;
+    }
+    
+    .alert-danger {
+        background: #f8d7da;
+        color: #721c24;
+        border: none;
+        border-radius: 10px;
+        padding: 15px 20px;
+        margin-bottom: 20px;
+    }
+    
+    /* Stats */
+    .stats-bar {
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+        flex-wrap: wrap;
+        margin-bottom: 25px;
+    }
+    
+    .stat-item {
+        text-align: center;
+    }
+    
+    .stat-number {
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: #075e54;
+    }
+    
+    .stat-label {
+        color: #666;
+        font-size: 0.9rem;
+    }
+    
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #666;
+    }
+    
+    .empty-state-icon {
+        font-size: 4rem;
+        opacity: 0.5;
+        margin-bottom: 15px;
     }
 </style>
 
+<div class="market-rates-container">
+    <!-- Alerts -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert-success">@TempData["Success"]</div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert-danger">@TempData["Error"]</div>
+    }
 
-<div class="market-container">
-    <h2>🌾 Live Market Rates</h2>
-
-    <div class="update-btn-container">
-        <form method="post" asp-action="UpdateNow" asp-controller="MarketRates">
-            <button type="submit" class="btn btn-primary">
-                🔄 Run Update Now (Test)
+    <!-- Header -->
+    <div class="rates-header">
+        <h1>📊 Live Market Rates</h1>
+        <p>براہ راست منڈی کے نرخ - Pakistan Crop Prices</p>
+        
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div class="stat-number">@Model.Count()</div>
+                <div class="stat-label">Crops / فصلیں</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">@Model.FirstOrDefault()?.LastUpdated.ToString("HH:mm")</div>
+                <div class="stat-label">Last Update / آخری اپڈیٹ</div>
+            </div>
+        </div>
+        
+        <form method="post" asp-action="UpdateNow" asp-controller="MarketRates" style="display: inline;">
+            <button type="submit" class="update-btn">
+                🔄 Refresh Rates / نرخ تازہ کریں
             </button>
         </form>
     </div>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Crop</th>
-                <th>Rate (PKR)</th>
-                <th>Last Updated</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var r in Model)
+    <!-- Search -->
+    <div class="search-container">
+        <input type="text" class="search-input" id="searchInput" placeholder="🔍 Search crops... / فصل تلاش کریں..." />
+    </div>
+
+    <!-- Filter Tabs -->
+    <div class="filter-tabs">
+        <button class="filter-tab active" data-filter="all">All / سب</button>
+        <button class="filter-tab" data-filter="grain">🌾 Grains / اناج</button>
+        <button class="filter-tab" data-filter="pulse">🫘 Pulses / دالیں</button>
+        <button class="filter-tab" data-filter="vegetable">🥬 Vegetables / سبزیاں</button>
+        <button class="filter-tab" data-filter="fruit">🍎 Fruits / پھل</button>
+        <button class="filter-tab" data-filter="oilseed">🌻 Oilseeds / تیل</button>
+    </div>
+
+    <!-- Rates Grid -->
+    @if (Model != null && Model.Any())
+    {
+        <div class="rates-grid" id="ratesGrid">
+            @foreach (var rate in Model.OrderBy(r => r.CropName))
             {
-                <tr>
-                    <td>@r.CropName</td>
-                    <td>@r.CurrentRate</td>
-                    <td>@r.LastUpdated.ToLocalTime().ToString("g")</td>
-                </tr>
+                // Determine category and icon
+                var cropLower = rate.CropName.ToLower();
+                var category = "other";
+                var icon = "🌿";
+                
+                if (cropLower.Contains("wheat") || cropLower.Contains("rice") || cropLower.Contains("maize") || cropLower.Contains("barley"))
+                {
+                    category = "grain";
+                    icon = "🌾";
+                }
+                else if (cropLower.Contains("chickpea") || cropLower.Contains("lentil") || cropLower.Contains("mung") || cropLower.Contains("mash"))
+                {
+                    category = "pulse";
+                    icon = "🫘";
+                }
+                else if (cropLower.Contains("potato") || cropLower.Contains("onion") || cropLower.Contains("tomato") || cropLower.Contains("garlic") || 
+                         cropLower.Contains("ginger") || cropLower.Contains("carrot") || cropLower.Contains("cauliflower") || cropLower.Contains("chili"))
+                {
+                    category = "vegetable";
+                    icon = "🥬";
+                }
+                else if (cropLower.Contains("mango") || cropLower.Contains("apple") || cropLower.Contains("orange") || cropLower.Contains("banana") || 
+                         cropLower.Contains("guava") || cropLower.Contains("dates"))
+                {
+                    category = "fruit";
+                    icon = "🍎";
+                }
+                else if (cropLower.Contains("cotton") || cropLower.Contains("sunflower") || cropLower.Contains("canola") || cropLower.Contains("sesame"))
+                {
+                    category = "oilseed";
+                    icon = "🌻";
+                }
+                else if (cropLower.Contains("sugarcane") || cropLower.Contains("tobacco"))
+                {
+                    category = "cash";
+                    icon = "🌿";
+                }
+
+                <div class="rate-card" data-category="@category" data-name="@rate.CropName.ToLower() @rate.CropNameUrdu">
+                    <span class="category-badge">@category.ToUpper()</span>
+                    <div class="rate-card-header">
+                        <div class="crop-icon">@icon</div>
+                        <div class="crop-name">@rate.CropName.Split('/')[0].Trim()</div>
+                        @if (!string.IsNullOrEmpty(rate.CropNameUrdu))
+                        {
+                            <div class="crop-name-urdu">@rate.CropNameUrdu</div>
+                        }
+                    </div>
+                    <div class="rate-card-body">
+                        <div class="rate-price">Rs. @rate.CurrentRate.ToString("N0")</div>
+                        <div class="rate-unit">per @rate.Unit</div>
+                        <div class="rate-updated">
+                            <span class="rate-updated-dot"></span>
+                            @rate.LastUpdated.ToLocalTime().ToString("MMM dd, HH:mm")
+                        </div>
+                    </div>
+                </div>
             }
-        </tbody>
-    </table>
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <div class="empty-state-icon">📊</div>
+            <h3>No rates available</h3>
+            <p>Click "Refresh Rates" to load latest prices</p>
+        </div>
+    }
 </div>
+
+@section Scripts {
+    <script>
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const cards = document.querySelectorAll('.rate-card');
+            
+            cards.forEach(card => {
+                const name = card.dataset.name || '';
+                card.style.display = name.includes(searchTerm) ? 'block' : 'none';
+            });
+        });
+
+        // Filter tabs
+        document.querySelectorAll('.filter-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                // Update active state
+                document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                
+                const filter = this.dataset.filter;
+                const cards = document.querySelectorAll('.rate-card');
+                
+                cards.forEach(card => {
+                    if (filter === 'all' || card.dataset.category === filter) {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+        });
+    </script>
+}

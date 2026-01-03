@@ -12,13 +12,13 @@ namespace HarvestHub.WebApp.Data
         // ✅ Seed Admin Role + User
         public static async Task SeedRolesAndAdminAsync(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
         {
-            // ✅ Ensure Admin role exists
+            // Ensure Admin role exists
             if (!await roleManager.RoleExistsAsync("Admin"))
             {
                 await roleManager.CreateAsync(new IdentityRole("Admin"));
             }
 
-            // ✅ Default Admin User
+            // Default Admin User
             var adminEmail = "admin@harvesthub.com";
             var adminUser = await userManager.FindByEmailAsync(adminEmail);
 
@@ -52,11 +52,150 @@ namespace HarvestHub.WebApp.Data
             if (!context.MarketRates.Any())
             {
                 context.MarketRates.AddRange(
-                    new MarketRate { CropName = "Wheat", Rate = 4200, Date = DateTime.Now },
-                    new MarketRate { CropName = "Rice", Rate = 5000, Date = DateTime.Now },
-                    new MarketRate { CropName = "Sugarcane", Rate = 250, Date = DateTime.Now },
-                    new MarketRate { CropName = "Cotton", Rate = 8700, Date = DateTime.Now },
-                    new MarketRate { CropName = "Maize", Rate = 3100, Date = DateTime.Now }
+                    new MarketRate { CropName = "Wheat / گندم", CropNameUrdu = "گندم", CurrentRate = 4200, Unit = "40 Kg", LastUpdated = DateTime.UtcNow },
+                    new MarketRate { CropName = "Rice Basmati / باسمتی", CropNameUrdu = "باسمتی", CurrentRate = 9500, Unit = "40 Kg", LastUpdated = DateTime.UtcNow },
+                    new MarketRate { CropName = "Sugarcane / گنا", CropNameUrdu = "گنا", CurrentRate = 320, Unit = "40 Kg", LastUpdated = DateTime.UtcNow },
+                    new MarketRate { CropName = "Cotton / کپاس", CropNameUrdu = "کپاس", CurrentRate = 8700, Unit = "40 Kg", LastUpdated = DateTime.UtcNow },
+                    new MarketRate { CropName = "Maize / مکئی", CropNameUrdu = "مکئی", CurrentRate = 3100, Unit = "40 Kg", LastUpdated = DateTime.UtcNow },
+                    new MarketRate { CropName = "Potato / آلو", CropNameUrdu = "آلو", CurrentRate = 100, Unit = "Kg", LastUpdated = DateTime.UtcNow },
+                    new MarketRate { CropName = "Onion / پیاز", CropNameUrdu = "پیاز", CurrentRate = 150, Unit = "Kg", LastUpdated = DateTime.UtcNow },
+                    new MarketRate { CropName = "Tomato / ٹماٹر", CropNameUrdu = "ٹماٹر", CurrentRate = 180, Unit = "Kg", LastUpdated = DateTime.UtcNow }
+                );
+
+                await context.SaveChangesAsync();
+            }
+        }
+
+        // ✅ Seed Government Schemes for Farmers
+        public static async Task SeedGovernmentSchemesAsync(ApplicationDbContext context)
+        {
+            if (!context.GovernmentSchemes.Any())
+            {
+                context.GovernmentSchemes.AddRange(
+                    new GovernmentScheme
+                    {
+                        Title = "PM Kisan Samman Nidhi",
+                        TitleUrdu = "وزیر اعظم کسان سمان نیدھی",
+                        Description = "Direct income support of Rs. 6,000 per year to small and marginal farmers in three equal installments. This scheme aims to supplement the financial needs of farmers in procuring various inputs to ensure proper crop health and appropriate yields.",
+                        DescriptionUrdu = "چھوٹے اور معمولی کسانوں کو براہ راست آمدنی کی حمایت سالانہ 6,000 روپے تین مساوی قسطوں میں۔",
+                        Category = "Subsidy",
+                        Status = "Active",
+                        IsFeatured = true,
+                        Eligibility = "All landholding farmer families with cultivable land. Must have valid CNIC and bank account.",
+                        Benefits = "Rs. 6,000 annual direct cash transfer in 3 installments of Rs. 2,000 each.",
+                        HowToApply = "Visit nearest NADRA office or apply online through PM Kisan portal with CNIC and land documents.",
+                        ContactInfo = "Helpline: 0800-00786",
+                        OfficialLink = "https://www.pakistan.gov.pk",
+                        StartDate = new DateTime(2019, 2, 1),
+                        DisplayOrder = 1
+                    },
+                    new GovernmentScheme
+                    {
+                        Title = "Kissan Package 2024",
+                        TitleUrdu = "کسان پیکج 2024",
+                        Description = "Comprehensive relief package for farmers including subsidized fertilizers, reduced electricity rates for tube wells, and interest-free loans for small farmers.",
+                        DescriptionUrdu = "کسانوں کے لیے جامع ریلیف پیکج جس میں سبسڈی والی کھادیں، ٹیوب ویلز کے لیے کم بجلی کی شرحیں، اور چھوٹے کسانوں کے لیے بلا سود قرضے شامل ہیں۔",
+                        Category = "Subsidy",
+                        Status = "Active",
+                        IsFeatured = true,
+                        Eligibility = "All registered farmers with valid land ownership documents.",
+                        Benefits = "50% subsidy on DAP fertilizer, reduced electricity tariff, interest-free loans up to Rs. 150,000.",
+                        HowToApply = "Register at local agriculture office with CNIC, land documents, and passbook.",
+                        ContactInfo = "Agriculture Helpline: 0800-12345",
+                        StartDate = new DateTime(2024, 1, 1),
+                        DisplayOrder = 2
+                    },
+                    new GovernmentScheme
+                    {
+                        Title = "Zarai Taraqiati Bank Loans",
+                        TitleUrdu = "زرعی ترقیاتی بینک قرضے",
+                        Description = "Agricultural development loans for farmers at subsidized interest rates. Loans available for crop production, farm mechanization, livestock, and land development.",
+                        DescriptionUrdu = "کسانوں کے لیے سبسڈی والی شرحوں پر زرعی ترقیاتی قرضے۔",
+                        Category = "Loan",
+                        Status = "Active",
+                        Eligibility = "Farmers with land ownership or lease agreement. Good credit history preferred.",
+                        Benefits = "Loans from Rs. 50,000 to Rs. 5,000,000. Interest rates as low as 8%.",
+                        HowToApply = "Visit nearest ZTBL branch with land documents, CNIC, and application form.",
+                        ContactInfo = "ZTBL Helpline: 051-9252670",
+                        OfficialLink = "https://www.ztbl.com.pk",
+                        StartDate = new DateTime(2000, 1, 1),
+                        DisplayOrder = 3
+                    },
+                    new GovernmentScheme
+                    {
+                        Title = "Crop Insurance Scheme",
+                        TitleUrdu = "فصل بیمہ اسکیم",
+                        Description = "Government-backed crop insurance to protect farmers against natural calamities, pest attacks, and crop failures. Covers wheat, cotton, rice, sugarcane, and maize.",
+                        DescriptionUrdu = "قدرتی آفات، کیڑوں کے حملوں اور فصلوں کی ناکامی سے کسانوں کی حفاظت کے لیے حکومت کی طرف سے فصل بیمہ۔",
+                        Category = "Insurance",
+                        Status = "Active",
+                        Eligibility = "All farmers growing insured crops. Must register before sowing season.",
+                        Benefits = "Coverage up to Rs. 100,000 per acre. Premium subsidy of 50%.",
+                        HowToApply = "Register at local agriculture office or through partner insurance companies.",
+                        ContactInfo = "PCRWR: 041-9201553",
+                        StartDate = new DateTime(2018, 1, 1),
+                        DisplayOrder = 4
+                    },
+                    new GovernmentScheme
+                    {
+                        Title = "Tractor Subsidy Scheme",
+                        TitleUrdu = "ٹریکٹر سبسڈی اسکیم",
+                        Description = "Subsidized tractors for small farmers to promote farm mechanization. The scheme provides tractors at 50% subsidized rates through government-approved dealers.",
+                        DescriptionUrdu = "فارم میکنائزیشن کو فروغ دینے کے لیے چھوٹے کسانوں کے لیے سبسڈی والے ٹریکٹر۔",
+                        Category = "Equipment",
+                        Status = "Active",
+                        Eligibility = "Small farmers with land holding less than 12.5 acres. Must not own a tractor.",
+                        Benefits = "50% subsidy on tractor purchase. Priority to women farmers and youth.",
+                        HowToApply = "Apply through Punjab/Sindh Agriculture Department website or local office.",
+                        ContactInfo = "Agriculture Department: 042-99210431",
+                        StartDate = new DateTime(2020, 1, 1),
+                        DisplayOrder = 5
+                    },
+                    new GovernmentScheme
+                    {
+                        Title = "Free Seed Distribution",
+                        TitleUrdu = "مفت بیج تقسیم",
+                        Description = "Distribution of certified high-yield seeds to farmers free of cost or at subsidized rates. Includes wheat, rice, cotton, and vegetable seeds.",
+                        DescriptionUrdu = "کسانوں کو مفت یا سبسڈی والی قیمتوں پر تصدیق شدہ زیادہ پیداوار والے بیجوں کی تقسیم۔",
+                        Category = "Seeds",
+                        Status = "Active",
+                        Eligibility = "All registered farmers. Priority to flood-affected and low-income farmers.",
+                        Benefits = "Free seeds worth Rs. 5,000 per acre. Technical guidance included.",
+                        HowToApply = "Contact local agriculture extension office before sowing season.",
+                        ContactInfo = "Seed Corporation: 042-35761437",
+                        StartDate = new DateTime(2015, 1, 1),
+                        DisplayOrder = 6
+                    },
+                    new GovernmentScheme
+                    {
+                        Title = "Farmer Training Program",
+                        TitleUrdu = "کسان تربیتی پروگرام",
+                        Description = "Free training programs for farmers on modern farming techniques, pest management, water conservation, and organic farming practices.",
+                        DescriptionUrdu = "جدید کاشتکاری تکنیک، کیڑوں کے انتظام، پانی کے تحفظ اور نامیاتی کاشتکاری کے طریقوں پر کسانوں کے لیے مفت تربیتی پروگرام۔",
+                        Category = "Training",
+                        Status = "Active",
+                        Eligibility = "All farmers. Youth and women farmers are encouraged.",
+                        Benefits = "Free training, certificate, and sometimes daily allowance. Modern equipment demonstration.",
+                        HowToApply = "Register at nearest Agricultural Extension Center or online portal.",
+                        ContactInfo = "NARC: 051-9255013",
+                        StartDate = new DateTime(2010, 1, 1),
+                        DisplayOrder = 7
+                    },
+                    new GovernmentScheme
+                    {
+                        Title = "Fertilizer Subsidy Scheme",
+                        TitleUrdu = "کھاد سبسڈی اسکیم",
+                        Description = "Subsidized fertilizers including DAP, Urea, and Potash for farmers at reduced prices through authorized dealers.",
+                        DescriptionUrdu = "مجاز ڈیلرز کے ذریعے کم قیمتوں پر کسانوں کے لیے ڈی اے پی، یوریا اور پوٹاش سمیت سبسڈی والی کھادیں۔",
+                        Category = "Fertilizer",
+                        Status = "Active",
+                        Eligibility = "All farmers with valid CNIC. Quota based on land holding.",
+                        Benefits = "Up to 30% subsidy on fertilizers. Direct delivery to villages.",
+                        HowToApply = "Register at local dealer with CNIC and land documents.",
+                        ContactInfo = "NFDC: 042-35761500",
+                        StartDate = new DateTime(2022, 1, 1),
+                        DisplayOrder = 8
+                    }
                 );
 
                 await context.SaveChangesAsync();

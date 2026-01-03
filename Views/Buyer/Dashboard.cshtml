@@ -4,34 +4,821 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="max-w-3xl mx-auto mt-10 bg-white shadow-lg rounded-lg p-6 space-y-4">
-    <h2 class="text-2xl font-bold text-yellow-700">Welcome, @Model.Buyer.FullName!</h2>
+<style>
+    .buyer-dashboard {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    /* Welcome Card */
+    .welcome-card {
+        background: linear-gradient(135deg, #075e54, #128c7e);
+        color: white;
+        border-radius: 20px;
+        padding: 30px;
+        margin-bottom: 25px;
+        box-shadow: 0 10px 30px rgba(7, 94, 84, 0.3);
+    }
+    
+    .welcome-card h2 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 15px;
+    }
+    
+    .welcome-card p {
+        opacity: 0.9;
+        margin-bottom: 5px;
+    }
+    
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+    
+    .user-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        font-weight: bold;
+    }
+    
+    /* Quick Actions */
+    .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 15px;
+        margin-bottom: 30px;
+    }
+    
+    .action-card {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        text-decoration: none;
+        color: #333;
+        border: 2px solid transparent;
+    }
+    
+    .action-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        border-color: #128c7e;
+        color: #075e54;
+    }
+    
+    .action-icon {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+    }
+    
+    .action-title {
+        font-weight: 600;
+        font-size: 1rem;
+    }
+    
+    .action-subtitle {
+        font-size: 0.8rem;
+        color: #666;
+        margin-top: 5px;
+    }
+    
+    /* Section Header */
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    
+    .section-title {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #1a1a1a;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .view-all-btn {
+        background: #e8f5e9;
+        color: #2e7d32;
+        padding: 8px 16px;
+        border-radius: 20px;
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+    
+    .view-all-btn:hover {
+        background: #2e7d32;
+        color: white;
+    }
+    
+    /* Crops Grid */
+    .crops-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
+    }
+    
+    @@media (max-width: 768px) {
+        .crops-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .buyer-dashboard {
+            padding: 10px;
+        }
+    }
+    
+    .crop-card {
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        text-decoration: none;
+        color: inherit;
+    }
+    
+    .crop-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+    }
+    
+    .crop-image {
+        width: 100%;
+        height: 160px;
+        object-fit: cover;
+        background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+    }
+    
+    .crop-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .crop-content {
+        padding: 15px;
+    }
+    
+    .crop-name {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 5px;
+    }
+    
+    .crop-variety {
+        color: #666;
+        font-size: 0.9rem;
+        margin-bottom: 10px;
+    }
+    
+    .crop-price {
+        background: linear-gradient(135deg, #075e54, #128c7e);
+        color: white;
+        padding: 8px 15px;
+        border-radius: 25px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        display: inline-block;
+    }
+    
+    .crop-farmer {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid #eee;
+        font-size: 0.85rem;
+        color: #666;
+    }
+    
+    .farmer-avatar-small {
+        width: 25px;
+        height: 25px;
+        border-radius: 50%;
+        background: #e8f5e9;
+        color: #2e7d32;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+        font-weight: bold;
+    }
+    
+    /* Crop Card Actions */
+    .crop-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 15px;
+        flex-wrap: wrap;
+    }
+    
+    .btn-crop-action {
+        flex: 1;
+        min-width: 80px;
+        padding: 8px 12px;
+        border-radius: 8px;
+        text-align: center;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+    }
+    
+    .btn-view-details {
+        background: linear-gradient(135deg, #075e54, #128c7e);
+        color: white;
+    }
+    
+    .btn-view-details:hover {
+        background: linear-gradient(135deg, #064e46, #0f7269);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(7, 94, 84, 0.3);
+        color: white;
+    }
+    
+    .btn-buy-now {
+        background: linear-gradient(135deg, #ff6b35, #ff8c42);
+        color: white;
+    }
+    
+    .btn-buy-now:hover {
+        background: linear-gradient(135deg, #e55a2b, #e67a35);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+        color: white;
+    }
+    
+    .btn-chat {
+        background: linear-gradient(135deg, #25d366, #128c7e);
+        color: white;
+    }
+    
+    .btn-chat:hover {
+        background: linear-gradient(135deg, #1fb855, #0f7269);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+        color: white;
+    }
+    
+    /* Messages Button
+    .messages-floating-btn {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #075e54, #25d366);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4);
+        text-decoration: none;
+        transition: all 0.3s ease;
+        z-index: 1000;
+        } */
+    
+    .messages-floating-btn:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 25px rgba(37, 211, 102, 0.5);
+        color: white;
+    }
+    
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 40px;
+        color: #666;
+    }
+    
+    .empty-state-icon {
+        font-size: 4rem;
+        margin-bottom: 15px;
+        opacity: 0.5;
+    }
+</style>
 
-    <div class="text-gray-800">
-        <p><strong>Email:</strong> @Model.Buyer.Email</p>
-        <p><strong>CNIC:</strong> @Model.Buyer.CNIC</p>
+<div class="buyer-dashboard">
+    <!-- Welcome Card -->
+    <div class="welcome-card">
+        <div class="user-info">
+            <div class="user-avatar">
+                @(Model.Buyer.FullName?.Substring(0, 1).ToUpper() ?? "B")
+            </div>
+            <div>
+                <h2>Welcome, @Model.Buyer.FullName! 🛒</h2>
+                <p><strong>Email:</strong> @Model.Buyer.Email</p>
+                <p><strong>CNIC:</strong> @Model.Buyer.CNIC</p>
+            </div>
+        </div>
     </div>
 
-    <h3 class="text-xl font-semibold mt-6 mb-2">Available Crops</h3>
+    <!-- Success/Error Messages -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div style="background: #d4edda; color: #155724; padding: 15px 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #28a745;">
+            ✅ @TempData["SuccessMessage"]
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div style="background: #f8d7da; color: #721c24; padding: 15px 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #dc3545;">
+            ❌ @TempData["ErrorMessage"]
+        </div>
+    }
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        @foreach (var crop in Model.Crops)
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <a href="@Url.Action("MyConversations", "Chat")" class="action-card">
+            <div class="action-icon">💬</div>
+            <div class="action-title">Messages</div>
+            <div class="action-subtitle">پیغامات</div>
+        </a>
+        <a href="@Url.Action("Index", "MarketRates")" class="action-card">
+            <div class="action-icon">📈</div>
+            <div class="action-title">Market Rates</div>
+            <div class="action-subtitle">مارکیٹ ریٹ</div>
+        </a>
+        <a href="#crops-section" class="action-card">
+            <div class="action-icon">🌾</div>
+            <div class="action-title">Browse Crops</div>
+            <div class="action-subtitle">فصلیں دیکھیں</div>
+        </a>
+        <a href="@Url.Action("MyOrders", "Buyer")" class="action-card">
+            <div class="action-icon">📦</div>
+            <div class="action-title">My Orders</div>
+            <div class="action-subtitle">میرے آرڈرز</div>
+        </a>
+        <a href="@Url.Action("Logout", "Account")" class="action-card" onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">
+            <div class="action-icon">🚪</div>
+            <div class="action-title">Logout</div>
+            <div class="action-subtitle">لاگ آؤٹ</div>
+        </a>
+    </div>
+
+    <!-- Available Crops Section -->
+    <div id="crops-section">
+        <div class="section-header">
+            <div class="section-title">
+                🌾 Available Crops / دستیاب فصلیں
+            </div>
+        </div>
+
+        @if (Model.Crops != null && Model.Crops.Any())
         {
-            <div class="border rounded p-4 shadow">
-                <h4 class="font-bold">@crop.Name</h4>
-                <p>@crop.Variety</p>
-                <p>Rs. @crop.PricePerUnit / @crop.Unit</p>
-                <a href="@Url.Action("CropDetails", "Buyer", new { id = crop.Id })"
-                   class="text-blue-600 underline">
-                    View Details
-                </a>
+            <div class="crops-grid">
+                @foreach (var crop in Model.Crops)
+                {
+                    <div class="crop-card">
+                        <div class="crop-image">
+                            @if (crop.Images != null && crop.Images.Any())
+                            {
+                                <img src="@crop.Images.First().ImageUrl" alt="@crop.Name" />
+                            }
+                            else
+                            {
+                                <span>🌾</span>
+                            }
+                        </div>
+                        <div class="crop-content">
+                            <div class="crop-name">@crop.Name</div>
+                            <div class="crop-variety">@crop.Variety</div>
+                            <div class="crop-price">Rs. @crop.PricePerUnit / @crop.Unit</div>
+                            
+                            @if (crop.Farmer != null)
+                            {
+                                <div class="crop-farmer">
+                                    <div class="farmer-avatar-small">
+                                        @(crop.Farmer.FullName?.Substring(0, 1).ToUpper() ?? "F")
+                                    </div>
+                                    <span>@crop.Farmer.FullName</span>
+                                </div>
+                            }
+                            
+                            <div class="crop-actions">
+                                <a href="@Url.Action("cropDetails", "Buyer", new { id = crop.Id })" class="btn-crop-action btn-view-details">
+                                    📋 View Details
+                                </a>
+                                <a href="#" onclick="openBuyNowModal(@crop.Id, '@crop.Name', @crop.PricePerUnit, '@crop.Unit'); return false;" class="btn-crop-action btn-buy-now">
+                                    🛒 Buy Now
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="empty-state">
+                <div class="empty-state-icon">🌱</div>
+                <h3>No crops available yet</h3>
+                <p>ابھی کوئی فصلیں دستیاب نہیں</p>
             </div>
         }
     </div>
 
-    <form asp-controller="Account" asp-action="Logout" method="post">
+    <!-- Floating Chat Button -->
+    <a href="@Url.Action("MyConversations", "Chat")" class="messages-floating-btn" title="Messages">
+        💬
+    </a>
+
+    <!-- Hidden Logout Form -->
+    <form id="logoutForm" asp-controller="Account" asp-action="Logout" method="post" style="display: none;">
         @Html.AntiForgeryToken()
-      
     </form>
-   
+
+    <!-- Buy Now Modal -->
+    <div id="buyNowModal" class="modal-overlay" style="display: none;">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>🛒 Buy Now</h3>
+                <button type="button" class="modal-close" onclick="closeBuyNowModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="crop-info">
+                    <h4 id="modalCropName"></h4>
+                    <p class="crop-rate">Rate: <strong id="modalCropRate"></strong></p>
+                </div>
+                
+                <form id="buyNowForm" method="post" action="@Url.Action("PlaceOrder", "Buyer")">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="modalCropId" name="CropId" />
+                    
+                    <div class="form-group">
+                        <label for="quantity">Quantity (kg) / مقدار</label>
+                        <input type="number" id="quantity" name="Quantity" class="form-control" 
+                               min="200" step="1" placeholder="Minimum 200 kg" required 
+                               oninput="calculateTotal()" />
+                        <small class="text-muted">Minimum order: 200 kg (کم از کم آرڈر: 200 کلو)</small>
+                        <div id="quantityError" class="error-message" style="display: none;">
+                            Quantity must be at least 200 kg! (مقدار کم از کم 200 کلو ہونی چاہیے)
+                        </div>
+                    </div>
+                    
+                    <div class="price-calculator">
+                        <div class="calc-row">
+                            <span>Quantity:</span>
+                            <strong id="displayQuantity">0 kg</strong>
+                        </div>
+                        <div class="calc-row">
+                            <span>Rate per Unit:</span>
+                            <strong id="displayRate">Rs. 0</strong>
+                        </div>
+                        <div class="calc-divider"></div>
+                        <div class="calc-row calc-total">
+                            <span>Total Amount:</span>
+                            <strong id="displayTotal">Rs. 0</strong>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-actions">
+                        <button type="button" class="btn-cancel" onclick="closeBuyNowModal()">Cancel</button>
+                        <button type="submit" class="btn-submit">Place Order</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
+
+<style>
+    /* Modal Styles */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(4px);
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: fadeIn 0.3s ease;
+    }
+    
+    @@keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    .modal-container {
+        background: white;
+        border-radius: 20px;
+        width: 90%;
+        max-width: 500px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        animation: slideUp 0.3s ease;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    
+    @@keyframes slideUp {
+        from {
+            transform: translateY(50px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+    
+    .modal-header {
+        background: linear-gradient(135deg, #075e54, #128c7e);
+        color: white;
+        padding: 20px 25px;
+        border-radius: 20px 20px 0 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .modal-header h3 {
+        margin: 0;
+        font-size: 1.4rem;
+        font-weight: 700;
+    }
+    
+    .modal-close {
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        color: white;
+        font-size: 2rem;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
+    }
+    
+    .modal-close:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: rotate(90deg);
+    }
+    
+    .modal-body {
+        padding: 25px;
+    }
+    
+    .crop-info {
+        background: #f5f5f5;
+        padding: 15px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+    }
+    
+    .crop-info h4 {
+        margin: 0 0 8px 0;
+        color: #1a1a1a;
+        font-size: 1.2rem;
+    }
+    
+    .crop-rate {
+        margin: 0;
+        color: #666;
+        font-size: 0.95rem;
+    }
+    
+    .crop-rate strong {
+        color: #075e54;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #333;
+        font-size: 0.95rem;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        font-size: 1rem;
+        transition: all 0.3s;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: #128c7e;
+        box-shadow: 0 0 0 3px rgba(18, 140, 126, 0.1);
+    }
+    
+    .text-muted {
+        display: block;
+        margin-top: 5px;
+        font-size: 0.85rem;
+        color: #666;
+    }
+    
+    .error-message {
+        background: #ffebee;
+        color: #c62828;
+        padding: 10px 15px;
+        border-radius: 8px;
+        margin-top: 10px;
+        font-size: 0.9rem;
+        border-left: 4px solid #c62828;
+    }
+    
+    .price-calculator {
+        background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+    }
+    
+    .calc-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+        font-size: 0.95rem;
+    }
+    
+    .calc-row:last-child {
+        margin-bottom: 0;
+    }
+    
+    .calc-divider {
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #128c7e, transparent);
+        margin: 15px 0;
+    }
+    
+    .calc-total {
+        font-size: 1.2rem;
+        color: #075e54;
+    }
+    
+    .calc-total strong {
+        font-size: 1.4rem;
+    }
+    
+    .modal-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 25px;
+    }
+    
+    .btn-cancel,
+    .btn-submit {
+        flex: 1;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 10px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .btn-cancel {
+        background: #f5f5f5;
+        color: #666;
+    }
+    
+    .btn-cancel:hover {
+        background: #e0e0e0;
+        transform: translateY(-2px);
+    }
+    
+    .btn-submit {
+        background: linear-gradient(135deg, #ff6b35, #ff8c42);
+        color: white;
+    }
+    
+    .btn-submit:hover {
+        background: linear-gradient(135deg, #e55a2b, #e67a35);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(255, 107, 53, 0.4);
+    }
+</style>
+
+<script>
+    let currentCropData = {
+        id: 0,
+        name: '',
+        rate: 0,
+        unit: ''
+    };
+
+    function openBuyNowModal(cropId, cropName, pricePerUnit, unit) {
+        currentCropData = {
+            id: cropId,
+            name: cropName,
+            rate: pricePerUnit,
+            unit: unit
+        };
+
+        document.getElementById('modalCropId').value = cropId;
+        document.getElementById('modalCropName').textContent = cropName;
+        document.getElementById('modalCropRate').textContent = 'Rs. ' + pricePerUnit + ' / ' + unit;
+        document.getElementById('displayRate').textContent = 'Rs. ' + pricePerUnit + ' / ' + unit;
+        
+        // Reset form
+        document.getElementById('quantity').value = '';
+        document.getElementById('quantityError').style.display = 'none';
+        calculateTotal();
+        
+        document.getElementById('buyNowModal').style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeBuyNowModal() {
+        document.getElementById('buyNowModal').style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+
+    function calculateTotal() {
+        const quantity = parseFloat(document.getElementById('quantity').value) || 0;
+        const rate = currentCropData.rate;
+        const total = quantity * rate;
+        
+        // Update display
+        document.getElementById('displayQuantity').textContent = quantity + ' kg';
+        document.getElementById('displayTotal').textContent = 'Rs. ' + total.toLocaleString();
+        
+        // Validate minimum quantity
+        const errorDiv = document.getElementById('quantityError');
+        if (quantity > 0 && quantity < 200) {
+            errorDiv.style.display = 'block';
+        } else {
+            errorDiv.style.display = 'none';
+        }
+    }
+
+    // Form validation before submit
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('buyNowForm');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                const quantity = parseFloat(document.getElementById('quantity').value) || 0;
+                
+                if (quantity < 200) {
+                    e.preventDefault();
+                    document.getElementById('quantityError').style.display = 'block';
+                    document.getElementById('quantity').focus();
+                    return false;
+                }
+                
+                return true;
+            });
+        }
+    });
+
+    // Close modal when clicking outside
+    document.addEventListener('click', function(e) {
+        const modal = document.getElementById('buyNowModal');
+        if (e.target === modal) {
+            closeBuyNowModal();
+        }
+    });
+
+    // Close modal with Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeBuyNowModal();
+        }
+    });
+</script>

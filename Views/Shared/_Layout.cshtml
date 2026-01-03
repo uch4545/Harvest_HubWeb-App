@@ -7,174 +7,569 @@
     var currentUser = await _userManager.GetUserAsync(User);
     var fullName = currentUser?.FullName ?? "Guest";
     var role = currentUser?.RoleType ?? "";
+    var initial = fullName.Length > 0 ? fullName.Substring(0, 1).ToUpper() : "G";
 }
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
     <title>@ViewData["Title"] - HarvestHub</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="icon" type="image/png" href="~/image/harvest/N__1_-removebg-preview.png" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
-             /* Admin / Data table base styles */
-             table {
-                 width: 100%;
-                 border-collapse: collapse;
-                 font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-                 table-layout: auto; /* or 'fixed' if you want fixed column widths */
-                 overflow: hidden;
-                 background: #fff;
-                 border-radius: 8px;
-             }
+        * {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+        
+        /* Sidebar Styling */
+        .sidebar {
+            background: linear-gradient(180deg, #075e54, #128c7e);
+            min-height: 100vh;
+        }
+        
+        .sidebar-brand {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .sidebar-brand img {
+            width: 45px;
+            height: 45px;
+            border-radius: 10px;
+            background: white;
+            padding: 5px;
+        }
+        
+        .sidebar-brand-text {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: white;
+        }
+        
+        .sidebar-nav {
+            padding: 20px 15px;
+        }
+        
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 15px;
+            color: rgba(255,255,255,0.9);
+            border-radius: 10px;
+            margin-bottom: 5px;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            background: rgba(255,255,255,0.15);
+            color: white;
+        }
+        
+        .nav-icon {
+            font-size: 1.1rem;
+        }
+        
+        .sidebar-footer {
+            padding: 15px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            margin-top: auto;
+        }
+        
+        .user-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .user-avatar-small {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+        
+        .user-name {
+            color: white;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+        
+        .user-role {
+            color: rgba(255,255,255,0.7);
+            font-size: 0.8rem;
+        }
+        
+        .logout-btn {
+            width: 100%;
+            background: rgba(220, 38, 38, 0.9);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .logout-btn:hover {
+            background: #dc2626;
+        }
+        
+        /* Header Styling */
+        .top-header {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .page-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+        
+        .role-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+            padding: 8px 15px;
+            border-radius: 25px;
+        }
+        
+        .role-dot {
+            width: 8px;
+            height: 8px;
+            background: #25d366;
+            border-radius: 50%;
+        }
+        
+        .role-text {
+            font-weight: 600;
+            color: #075e54;
+            font-size: 0.9rem;
+        }
+        
+        /* Table Styles */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: auto;
+            overflow: hidden;
+            background: #fff;
+            border-radius: 8px;
+        }
 
-                 /* Header */
-                 table thead th {
-                     text-align: left;
-                     padding: 12px 16px;
-                     background: #f7fafc; /* light bg */
-                     color: #1f2937; /* dark text */
-                     font-weight: 600;
-                     border-bottom: 1px solid #e5e7eb;
-                     vertical-align: middle;
-                 }
+        table thead th {
+            text-align: left;
+            padding: 12px 16px;
+            background: #f7fafc;
+            color: #1f2937;
+            font-weight: 600;
+            border-bottom: 1px solid #e5e7eb;
+            vertical-align: middle;
+        }
 
-                 /* Body rows */
-                 table tbody td {
-                     padding: 12px 16px;
-                     border-bottom: 1px solid #f1f5f9;
-                     color: #374151;
-                     vertical-align: middle; /* centers cell content vertically */
-                     white-space: nowrap; /* prevent wrapping for short columns; remove if you want wrap */
-                     overflow: hidden;
-                     text-overflow: ellipsis;
-                 }
+        table tbody td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f1f5f9;
+            color: #374151;
+            vertical-align: middle;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
 
-                 /* Zebra striping */
-                 table tbody tr:nth-child(even) {
-                     background: #fbfdff;
-                 }
+        table tbody tr:nth-child(even) {
+            background: #fbfdff;
+        }
 
-                 /* Action buttons cell */
-                 table td.actions {
-                     white-space: nowrap;
-                     text-align: center;
-                 }
+        table td.actions {
+            white-space: nowrap;
+            text-align: center;
+        }
 
-             /* Status badges */
-             .badge {
-                 display: inline-block;
-                 padding: 6px 10px;
-                 border-radius: 999px;
-                 font-size: 12px;
-                 font-weight: 600;
-                 color: #fff;
-             }
+        .badge {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #fff;
+        }
 
-                 .badge.green {
-                     background: #16a34a;
-                 }
+        .badge.green { background: #16a34a; }
+        .badge.red { background: #dc2626; }
+        .badge.yellow { background: #f59e0b; }
 
-                 .badge.red {
-                     background: #dc2626;
-                 }
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            border-radius: 8px;
+            box-shadow: 0 1px 2px rgba(15,23,42,0.03);
+        }
 
-                 .badge.yellow {
-                     background: #f59e0b;
-                 }
-
-             /* Responsive: wrap table in a scroll container on small screens */
-             .table-responsive {
-                 width: 100%;
-                 overflow-x: auto;
-                 -webkit-overflow-scrolling: touch;
-                 border-radius: 8px;
-                 box-shadow: 0 1px 2px rgba(15,23,42,0.03);
-             }
-
-             /* Optional: fixed first column (example) */
-             /* .admin-table th:first-child,
-        .admin-table td:first-child {
-          position: sticky;
-          left: 0;
-          background: #fff;
-          z-index: 2;
-          box-shadow: 2px 0 6px rgba(0,0,0,0.03);
-        } */
-
-             /* Small screens: reduce padding */
-             @@media (max-width: 640px) {
-                 table thead th,
-                 table tbody td {
-                     padding: 8px 10px;
-                     font-size: 13px;
-                 }
-             }
+        @@media (max-width: 640px) {
+            table thead th,
+            table tbody td {
+                padding: 8px 10px;
+                font-size: 13px;
+            }
+        }
+        
+        /* ===================== MOBILE RESPONSIVE STYLES ===================== */
+        
+        /* Hamburger Menu Button */
+        .hamburger-btn {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 10001;
+            background: linear-gradient(135deg, #075e54, #128c7e);
+            color: white;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+        }
+        
+        .hamburger-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .hamburger-icon {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .hamburger-icon span {
+            display: block;
+            width: 20px;
+            height: 2px;
+            background: white;
+            transition: all 0.3s;
+        }
+        
+        /* Mobile Overlay */
+        .mobile-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 9998;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .mobile-overlay.active {
+            opacity: 1;
+        }
+        
+        @@media (max-width: 768px) {
+            /* Show hamburger menu */
+            .hamburger-btn {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            /* Hide sidebar by default on mobile */
+            .sidebar {
+                position: fixed;
+                left: -280px;
+                top: 0;
+                bottom: 0;
+                width: 280px;
+                z-index: 9999;
+                transition: left 0.3s ease;
+            }
+            
+            .sidebar.active {
+                left: 0;
+            }
+            
+            /* Show overlay when sidebar is open */
+            .mobile-overlay {
+                display: block;
+            }
+            
+            /* Adjust main content */
+            body {
+                padding-left: 0 !important;
+            }
+            
+            .flex-1.flex.flex-col {
+                margin-left: 0 !important;
+                width: 100%;
+            }
+            
+            /* Adjust top header */
+            .top-header {
+                padding: 15px 60px 15px 60px;
+            }
+            
+            .page-title {
+                font-size: 1.1rem;
+            }
+            
+            .role-badge {
+                font-size: 0.8rem;
+                padding: 6px 12px;
+            }
+            
+            /* Adjust main content padding */
+            main {
+                padding: 15px !important;
+            }
+            
+            /* Make cards stack on mobile */
+            .quick-actions,
+            .stats-grid,
+            .crops-grid {
+                grid-template-columns: 1fr !important;
+            }
+            
+            /* Adjust action cards */
+            .action-card {
+                padding: 15px;
+            }
+            
+            .action-icon {
+                font-size: 2rem;
+            }
+            
+            /* Adjust stat cards */
+            .stat-card {
+                padding: 15px;
+            }
+            
+            .stat-number {
+                font-size: 1.5rem;
+            }
+            
+            /* Welcome card adjustments */
+            .welcome-card {
+                padding: 20px;
+            }
+            
+            .welcome-card h2 {
+                font-size: 1.3rem;
+            }
+            
+            .user-avatar {
+                width: 60px;
+                height: 60px;
+                font-size: 1.5rem;
+            }
+            
+            /* Table responsive */
+            .table-responsive {
+                overflow-x: auto;
+            }
+            
+            /* Form adjustments */
+            input, select, textarea {
+                font-size: 16px !important; /* Prevents zoom on iOS */
+            }
+            
+            /* Sidebar nav adjustments */
+            .nav-link {
+                padding: 12px 12px;
+                font-size: 0.95rem;
+            }
+            
+            .sidebar-brand {
+                padding: 15px;
+            }
+            
+            .sidebar-brand-text {
+                font-size: 1.2rem;
+            }
+        }
+        
+        /* Small mobile phones */
+        @@media (max-width: 480px) {
+            .top-header {
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-start;
+                padding: 15px 60px 15px 15px;
+            }
+            
+            .role-badge {
+                align-self: flex-start;
+            }
+        }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen flex">
 
-    <!-- Sidebar -->
-    <aside class="w-64 bg-yellow-700 text-white flex flex-col">
-        <div class="px-6 py-4 text-2xl font-bold border-b border-yellow-600">
-            HarvestHub
+    <!-- Hamburger Menu Button -->
+    <button class="hamburger-btn" onclick="toggleSidebar()">
+        <div class="hamburger-icon">
+            <span></span>
+            <span></span>
+            <span></span>
         </div>
-        <nav class="flex-1 px-4 py-6 space-y-2">
+    </button>
+
+    <!-- Mobile Overlay -->
+    <div class="mobile-overlay" onclick="closeSidebar()"></div>
+
+    <!-- Sidebar -->
+    <aside class="w-64 sidebar flex flex-col">
+        <!-- Brand -->
+        <div class="sidebar-brand">
+            <img src="~/image/harvest/N__1_-removebg-preview.png" alt="HarvestHub Logo" />
+            <span class="sidebar-brand-text">HarvestHub</span>
+        </div>
+        
+        <!-- Navigation -->
+        <nav class="sidebar-nav flex-1">
             @if (role == "Buyer")
             {
-               
-                <a asp-controller="Buyer" asp-action="Dashboard"
-                   class="block py-2 px-3 rounded hover:bg-yellow-600">Dashboard</a>
-                <a asp-controller="Orders" asp-action="Index"
-                   class="block py-2 px-3 rounded hover:bg-yellow-600">My Orders</a>
-                <a href="@Url.Action("Index", "MarketRates")"
-                   class="block py-2 px-3 rounded hover:bg-yellow-600">
-                    View Live Market Rates
-                    
+                <a asp-controller="Buyer" asp-action="Dashboard" class="nav-link">
+                    <span class="nav-icon">🏠</span> Dashboard
                 </a>
-             
-             
-
+                <a asp-controller="Chat" asp-action="MyConversations" class="nav-link">
+                    <span class="nav-icon">💬</span> Messages
+                </a>
+                <a asp-controller="Buyer" asp-action="MyOrders" class="nav-link">
+                    <span class="nav-icon">📦</span> My Orders
+                </a>
+                <a asp-controller="MarketRates" asp-action="Index" class="nav-link">
+                    <span class="nav-icon">📈</span> Market Rates
+                </a>
             }
             else if (role == "Farmer")
             {
-                <a asp-controller="Farmer" asp-action="Dashboard"
-                   class="block py-2 px-3 rounded hover:bg-yellow-600">Dashboard</a>
-                <a asp-controller="Farmer" asp-action="MyCrops"
-                   class="block py-2 px-3 rounded hover:bg-yellow-600">My Products</a>
-                <a asp-controller="Farmer" asp-action="MyReports"
-                   class="block py-2 px-3 rounded hover:bg-yellow-600">My Reports</a>
-                <a href="@Url.Action("Index", "MarketRates")"
-                   class="block py-2 px-3 rounded hover:bg-yellow-600">
-                    View Live Market Rates
-
+                <a asp-controller="Farmer" asp-action="Dashboard" class="nav-link">
+                    <span class="nav-icon">🏠</span> Dashboard
+                </a>
+                <a asp-controller="Farmer" asp-action="MyCrops" class="nav-link">
+                    <span class="nav-icon">🌾</span> My Crops
+                </a>
+                <a asp-controller="Farmer" asp-action="AddCrop" class="nav-link">
+                    <span class="nav-icon">➕</span> Add Crop
+                </a>
+                <a asp-controller="Chat" asp-action="MyConversations" class="nav-link">
+                    <span class="nav-icon">💬</span> Messages
+                </a>
+                <a asp-controller="Farmer" asp-action="MyReports" class="nav-link">
+                    <span class="nav-icon">📊</span> Lab Reports
+                </a>
+                <a asp-controller="MarketRates" asp-action="Index" class="nav-link">
+                    <span class="nav-icon">📈</span> Market Rates
+                </a>
+                <a asp-controller="Schemes" asp-action="Index" class="nav-link">
+                    <span class="nav-icon">🏛️</span> Govt Schemes
                 </a>
             }
             else if (role == "Admin")
             {
-                <a asp-controller="Admin" asp-action="Dashboard"
-                   class="block py-2 px-3 rounded hover:bg-yellow-600">Admin Dashboard</a>
-                <a asp-controller="Admin" asp-action="ManageUsers"
-                   class="block py-2 px-3 rounded hover:bg-yellow-600">Manage Users</a>
-                <a asp-controller="Admin" asp-action="ManageProducts"
-                   class="block py-2 px-3 rounded hover:bg-yellow-600">Manage Products</a>
-                <a asp-controller="Admin" asp-action="VerifyDocuments"
-                   class="block py-2 px-3 rounded hover:bg-yellow-600">Verify Documents</a>
-                <a asp-controller="Admin" asp-action="ManageLabs"
-                   class="block py-2 px-3 rounded hover:bg-yellow-600">Manage Labs</a>
-
+                <a asp-controller="Admin" asp-action="Dashboard" class="nav-link">
+                    <span class="nav-icon">🏠</span> Dashboard
+                </a>
+                <a asp-controller="Admin" asp-action="ManageUsers" class="nav-link">
+                    <span class="nav-icon">👥</span> Manage Users
+                </a>
+                <a asp-controller="Admin" asp-action="ManageProducts" class="nav-link">
+                    <span class="nav-icon">📦</span> Manage Products
+                </a>
+                <a asp-controller="Admin" asp-action="VerifyDocuments" class="nav-link">
+                    <span class="nav-icon">📄</span> Verify Documents
+                </a>
+                <a asp-controller="Admin" asp-action="ManageLabs" class="nav-link">
+                    <span class="nav-icon">🔬</span> Manage Labs
+                </a>
+                <a asp-controller="MarketRates" asp-action="ManageRates" class="nav-link">
+                    <span class="nav-icon">📈</span> Market Rates
+                </a>
+                <a asp-controller="Schemes" asp-action="ManageSchemes" class="nav-link">
+                    <span class="nav-icon">🏛️</span> Govt Schemes
+                </a>
             }
-
         </nav>
-        <div class="px-4 py-4 border-t border-yellow-600">
-            <p class="font-semibold">@fullName</p>
-            <form asp-controller="Account" asp-action="Logout" method="post" class="mt-2">
+        
+        <!-- Footer with User Info -->
+        <div class="sidebar-footer">
+            @if (role == "Farmer")
+            {
+                <a asp-controller="Farmer" asp-action="Dashboard" class="user-card" style="text-decoration: none; cursor: pointer;">
+                    <div class="user-avatar-small">@initial</div>
+                    <div>
+                        <div class="user-name">@fullName</div>
+                        <div class="user-role">@role</div>
+                    </div>
+                </a>
+            }
+            else if (role == "Buyer")
+            {
+                <a asp-controller="Buyer" asp-action="Dashboard" class="user-card" style="text-decoration: none; cursor: pointer;">
+                    <div class="user-avatar-small">@initial</div>
+                    <div>
+                        <div class="user-name">@fullName</div>
+                        <div class="user-role">@role</div>
+                    </div>
+                </a>
+            }
+            else if (role == "Admin")
+            {
+                <a asp-controller="Admin" asp-action="Dashboard" class="user-card" style="text-decoration: none; cursor: pointer;">
+                    <div class="user-avatar-small">@initial</div>
+                    <div>
+                        <div class="user-name">@fullName</div>
+                        <div class="user-role">@role</div>
+                    </div>
+                </a>
+            }
+            else
+            {
+                <div class="user-card">
+                    <div class="user-avatar-small">@initial</div>
+                    <div>
+                        <div class="user-name">@fullName</div>
+                        <div class="user-role">@role</div>
+                    </div>
+                </div>
+            }
+            <form asp-controller="Account" asp-action="Logout" method="post">
                 @Html.AntiForgeryToken()
-                <button type="submit" class="w-full bg-red-600 hover:bg-red-700 py-2 px-4 rounded">
-                    Logout
+                <button type="submit" class="logout-btn">
+                    🚪 Logout
                 </button>
             </form>
         </div>
@@ -182,17 +577,62 @@
 
     <!-- Main content -->
     <div class="flex-1 flex flex-col">
-        <!-- Top navbar -->
-        <header class="bg-white shadow px-6 py-4 flex justify-between items-center">
-            <h1 class="text-xl font-semibold text-gray-800">@ViewData["Title"]</h1>
-            <span class="text-gray-600">Role: @role</span>
+        <!-- Top Header -->
+        <header class="top-header">
+            <h1 class="page-title">@ViewData["Title"]</h1>
+            <div class="role-badge">
+                <span class="role-dot"></span>
+                <span class="role-text">@role</span>
+            </div>
         </header>
 
         <!-- Page content -->
-        <main class="flex-1 p-6">
+        <main class="flex-1 p-6 overflow-auto">
             @RenderBody()
         </main>
     </div>
+
+    <!-- AI Chat Widget -->
+    @if (role != "Admin")
+    {
+        <partial name="_ChatWidget" />
+    }
+
+    <script>
+        // Mobile Sidebar Toggle Functions
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.querySelector('.mobile-overlay');
+            
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+        
+        function closeSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.querySelector('.mobile-overlay');
+            
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+        }
+        
+        // Close sidebar when clicking on a nav link (mobile only)
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.innerWidth <= 768) {
+                const navLinks = document.querySelectorAll('.nav-link');
+                navLinks.forEach(link => {
+                    link.addEventListener('click', closeSidebar);
+                });
+            }
+        });
+        
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 768) {
+                closeSidebar();
+            }
+        });
+    </script>
 
     @RenderSection("Scripts", required: false)
 </body>

@@ -1,62 +1,270 @@
-﻿@model IEnumerable<HarvestHub.WebApp.Models.Crop>
+﻿@using Microsoft.IdentityModel.Tokens
+@model IEnumerable<HarvestHub.WebApp.Models.Crop>
 @{
     ViewData["Title"] = "My Crops";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<h2 class="text-2xl font-bold mb-4">My Crops</h2>
-<a asp-action="AddCrop" class="bg-green-600 text-white px-3 py-2 rounded">+ Add Crop</a>
 
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-    @foreach (var crop in Model)
-    {
-        <div class="relative bg-white rounded shadow hover:shadow-lg transition">
-
-            <!-- Action Buttons -->
-            <div class="absolute top-2 right-2 flex space-x-2 z-10">
-                <a asp-action="EditCrop" asp-route-id="@crop.Id"
-                   class="bg-blue-500 text-white px-2 py-1 rounded text-sm hover:bg-blue-600">
-                    Edit
-                </a>
-                <form asp-action="DeleteCrop" asp-route-id="@crop.Id" method="post"
-                      class="inline delete-form" data-cropname="@crop.Name">
-                    <button type="submit"
-                            class="bg-red-500 text-white px-2 py-1 rounded text-sm hover:bg-red-600">
-                        Delete
-                    </button>
-                </form>
-            </div>
-
-            <!-- Image Slider -->
-            <div class="relative w-full h-48 overflow-hidden rounded-t cursor-pointer"
-                 onclick="window.location='@Url.Action("CropDetails", "Farmer", new { id = crop.Id })'">
-                @if (crop.Images != null && crop.Images.Any())
-                {
-                    <div id="slider-@crop.Id" class="relative h-48">
-                        @for (int i = 0; i < crop.Images.Count; i++)
-                        {
-                            <img src="@crop.Images.ElementAt(i).ImageUrl"
-                                 class="absolute inset-0 w-full h-48 object-cover transition-opacity duration-700 @(i == 0 ? "opacity-100" : "opacity-0")"
-                                 data-slide="@i" />
-                        }
-                    </div>
-                }
-                else
-                {
-                    <img src="~/image/no-image.png" class="w-full h-48 object-cover" />
-                }
-            </div>
-
-            <!-- Card Content -->
-            <div class="p-4 cursor-pointer"
-                 onclick="window.location='@Url.Action("CropDetails", "Farmer", new { id = crop.Id })'">
-                <h3 class="text-lg font-bold">@crop.Name</h3>
-                <p class="text-yellow-700 font-semibold">
-                    Rs. @crop.PricePerUnit / @crop.Unit
-                </p>
-            </div>
-        </div>
+<style>
+    .crops-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+        gap: 15px;
     }
+
+    .crops-header h2 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin: 0;
+    }
+
+    .add-crop-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: linear-gradient(135deg, #075e54, #128c7e);
+        color: white;
+        padding: 12px 24px;
+        border-radius: 12px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s;
+        box-shadow: 0 4px 15px rgba(7, 94, 84, 0.3);
+        font-size: 1rem;
+    }
+
+    .add-crop-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(7, 94, 84, 0.4);
+        color: white;
+    }
+
+    .crops-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 25px;
+        margin-top: 25px;
+    }
+
+    .crop-card {
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        position: relative;
+        cursor: pointer;
+    }
+
+    .crop-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+
+    .crop-actions {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        display: flex;
+        gap: 8px;
+        z-index: 10;
+    }
+
+    .action-btn {
+        padding: 8px 14px;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s;
+        border: none;
+        cursor: pointer;
+        backdrop-filter: blur(8px);
+    }
+
+    .edit-btn {
+        background: rgba(18, 140, 126, 0.9);
+        color: white;
+    }
+
+    .edit-btn:hover {
+        background: #128c7e;
+    }
+
+    .delete-btn {
+        background: rgba(220, 38, 38, 0.9);
+        color: white;
+    }
+
+    .delete-btn:hover {
+        background: #dc2626;
+    }
+
+    .crop-image-container {
+        width: 100%;
+        height: 220px;
+        position: relative;
+        overflow: hidden;
+        background: #f0f0f0;
+    }
+
+    .crop-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+
+    .crop-card:hover .crop-image {
+        transform: scale(1.05);
+    }
+
+    .crop-content {
+        padding: 20px;
+    }
+
+    .crop-name {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 8px;
+    }
+
+    .crop-variety {
+        font-size: 0.9rem;
+        color: #666;
+        margin-bottom: 12px;
+    }
+
+    .crop-price {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #128c7e;
+        margin-bottom: 8px;
+    }
+
+    .crop-quantity {
+        font-size: 0.9rem;
+        color: #666;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 80px 20px;
+        color: #666;
+    }
+
+    .empty-state-icon {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+
+    .empty-state h3 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 10px;
+    }
+
+    .empty-state p {
+        color: #666;
+        margin-bottom: 20px;
+    }
+
+    @@media (max-width: 768px) {
+        .crops-header h2 {
+            font-size: 1.5rem;
+        }
+        
+        .crops-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="crops-header">
+    <h2>🌾 My Crops</h2>
+    <a asp-action="AddCrop" class="add-crop-btn">
+        <span>➕</span>
+        <span>Add New Crop</span>
+    </a>
 </div>
+
+@if (Model != null && Model.Any())
+{
+    <div class="crops-grid">
+        @foreach (var crop in Model)
+        {
+            <div class="crop-card" onclick="window.location='@Url.Action("CropDetails", "Farmer", new { id = crop.Id })'">
+                
+                <!-- Action Buttons -->
+                <div class="crop-actions" onclick="event.stopPropagation()">
+                    <a asp-action="EditCrop" asp-route-id="@crop.Id" class="action-btn edit-btn">
+                        Edit
+                    </a>
+                    <form asp-action="DeleteCrop" asp-route-id="@crop.Id" method="post"
+                          class="inline delete-form" data-cropname="@crop.Name" style="display: inline;">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="action-btn delete-btn">
+                            Delete
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Image Slider -->
+                <div class="crop-image-container">
+                    @if (crop.Images != null && crop.Images.Any())
+                    {
+                        <div id="slider-@crop.Id" class="relative h-full">
+                            @for (int i = 0; i < crop.Images.Count; i++)
+                            {
+                                <img src="@crop.Images.ElementAt(i).ImageUrl"
+                                     class="crop-image @(i == 0 ? "opacity-100" : "opacity-0") absolute inset-0 transition-opacity duration-700"
+                                     data-slide="@i"
+                                     alt="@crop.Name" />
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <img src="~/image/no-image.png" class="crop-image" alt="No image" />
+                    }
+                </div>
+
+                <!-- Card Content -->
+                <div class="crop-content">
+                    <h3 class="crop-name">@crop.Name</h3>
+                    <p class="crop-variety">Variety: @crop.Variety.ToString()</p>
+                    <p class="crop-price">Rs. @crop.PricePerUnit / @crop.Unit</p>
+                    <p class="crop-quantity">
+                        <span>📦</span>
+                        <span>Available: @crop.Quantity @crop.Unit</span>
+                    </p>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="empty-state">
+        <div class="empty-state-icon">🌾</div>
+        <h3>No Crops Yet</h3>
+        <p>Start adding your crops to showcase them to buyers!</p>
+        <a asp-action="AddCrop" class="add-crop-btn">
+            <span>➕</span>
+            <span>Add Your First Crop</span>
+        </a>
+    </div>
+}
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -85,11 +293,11 @@
 
                     Swal.fire({
                         title: "Delete Crop?",
-                        text: `Are you sure you want to delete "${cropName}"?`,
+                        text: `Are you sure you want to delete "${cropName}"? This action cannot be undone.`,
                         icon: "warning",
                         showCancelButton: true,
-                        confirmButtonColor: "#d33",
-                        cancelButtonColor: "#3085d6",
+                        confirmButtonColor: "#dc2626",
+                        cancelButtonColor: "#128c7e",
                         confirmButtonText: "Yes, delete it!",
                         cancelButtonText: "Cancel"
                     }).then((result) => {

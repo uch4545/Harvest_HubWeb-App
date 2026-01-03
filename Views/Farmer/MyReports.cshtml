@@ -6,63 +6,260 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2 class="text-2xl font-bold mb-4 text-yellow-700">My Reports</h2>
+<style>
+    .reports-container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
 
-<a asp-action="UploadReport"
-   class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow">
-    + Upload Report
-</a>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
 
-<div class="overflow-x-auto mt-6">
-    <table class="min-w-full border border-gray-200 bg-white rounded shadow">
-        <thead class="bg-gray-100 text-gray-700">
-            <tr>
-                <th class="px-4 py-2 text-left">Crop</th>
-                <th class="px-4 py-2 text-left">Lab</th>
-                <th class="px-4 py-2 text-left">File</th>
-                <th class="px-4 py-2 text-left">Submitted</th>
-                <th class="px-4 py-2 text-left">Actions</th>
-            </tr>
-        </thead>
-        <tbody>
+    .page-header h2 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin: 0;
+    }
+
+    .upload-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: linear-gradient(135deg, #075e54, #128c7e);
+        color: white;
+        padding: 12px 24px;
+        border-radius: 12px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s;
+        box-shadow: 0 4px 15px rgba(7, 94, 84, 0.3);
+    }
+
+    .upload-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(7, 94, 84, 0.4);
+        color: white;
+    }
+
+    .reports-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 25px;
+        margin-top: 25px;
+    }
+
+    .report-card {
+        background: white;
+        border-radius: 16px;
+        padding: 25px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        border-left: 4px solid #128c7e;
+    }
+
+    .report-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+    }
+
+    .report-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+
+    .report-icon {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+    .report-title {
+        flex: 1;
+    }
+
+    .crop-name {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 4px;
+    }
+
+    .lab-name {
+        font-size: 0.9rem;
+        color: #666;
+    }
+
+    .report-info {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+   .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+    }
+
+    .info-label {
+        font-size: 0.85rem;
+        color: #666;
+        font-weight: 500;
+    }
+
+    .info-value {
+        font-size: 0.9rem;
+        color: #1a1a1a;
+        font-weight: 600;
+    }
+
+    .view-file-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 16px;
+        background: #128c7e;
+        color: white;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+
+    .view-file-btn:hover {
+        background: #0d7a6a;
+        color: white;
+    }
+
+    .no-file {
+        color: #999;
+        font-style: italic;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 80px 20px;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+
+    .empty-state-icon {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+
+    .empty-state h3 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 10px;
+    }
+
+    .empty-state p {
+        color: #666;
+        margin-bottom: 25px;
+    }
+
+    @@media (max-width: 768px) {
+        .reports-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .page-header h2 {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+
+<div class="reports-container">
+    <div class="page-header">
+        <h2>🔬 My Lab Reports</h2>
+        <a asp-action="UploadReport" class="upload-btn">
+            <span>📤</span>
+            <span>Upload New Report</span>
+        </a>
+    </div>
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="reports-grid">
             @foreach (var item in Model)
             {
-                <tr class="border-b hover:bg-gray-50 transition">
-                    <td class="px-4 py-2">@item.Crop?.Name</td>
-                    <td class="px-4 py-2">@item.Laboratory?.LabName</td>
+                <div class="report-card">
+                    <div class="report-header">
+                        <div class="report-icon">🌾</div>
+                        <div class="report-title">
+                            <div class="crop-name">@(item.Crop?.Name ?? "N/A")</div>
+                            <div class="lab-name">@(item.Laboratory?.LabName ?? "Unknown Lab")</div>
+                        </div>
+                    </div>
 
-                    <td class="px-4 py-2">
-                        @if (!string.IsNullOrEmpty(item.Report.ReportFilePath))
-                        {
-                            <a href="@item.Report.ReportFilePath" target="_blank"
-                               class="text-blue-600 hover:text-blue-800 underline">View</a>
-                        }
-                        else
-                        {
-                            <span class="text-gray-400">No File</span>
-                        }
-                    </td>
-                    <td class="px-4 py-2">@item.Report.SubmittedAt.ToString("g")</td>
-                    @*<td class="px-4 py-2 space-x-2">
-            <a asp-action="EditReport" asp-route-id="@item.Report.Id"
-               class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded">
-                Edit
-            </a>
-            <form asp-action="DeleteReport" asp-route-id="@item.Report.Id" method="post"
-                  class="inline delete-form" data-crop="@item.Crop?.Name">
-                <button type="submit"
-                        class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded">
-                    Delete
-                </button>
-            </form>
-        </td>*@
-                </tr>
+                    <div class="report-info">
+                        <div class="info-row">
+                            <span class="info-label">📄 Report File:</span>
+                            @if (!string.IsNullOrEmpty(item.Report.ReportFilePath))
+                            {
+                                <a href="@item.Report.ReportFilePath" target="_blank" class="view-file-btn">
+                                    <span>👁️</span>
+                                    <span>View</span>
+                                </a>
+                            }
+                            else
+                            {
+                                <span class="no-file">No File</span>
+                            }
+                        </div>
+
+                        <div class="info-row">
+                            <span class="info-label">📅 Submitted:</span>
+                            <span class="info-value">@item.Report.SubmittedAt.ToString("MMM dd, yyyy")</span>
+                        </div>
+
+                        <div class="info-row">
+                            <span class="info-label">⏰ Time:</span>
+                            <span class="info-value">@item.Report.SubmittedAt.ToString("hh:mm tt")</span>
+                        </div>
+                    </div>
+                </div>
             }
-        </tbody>
-    </table>
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <div class="empty-state-icon">🔬</div>
+            <h3>No Lab Reports Yet</h3>
+            <p>Upload lab reports to verify your crop quality and build buyer trust!</p>
+            <a asp-action="UploadReport" class="upload-btn">
+                <span>📤</span>
+                <span>Upload Your First Report</span>
+            </a>
+        </div>
+    }
 </div>
 
 @section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             document.querySelectorAll(".delete-form").forEach(form => {
@@ -75,8 +272,8 @@
                         text: `Are you sure you want to delete report for "${crop}"?`,
                         icon: "warning",
                         showCancelButton: true,
-                        confirmButtonColor: "#d33",
-                        cancelButtonColor: "#3085d6",
+                        confirmButtonColor: "#dc2626",
+                        cancelButtonColor: "#128c7e",
                         confirmButtonText: "Yes, delete it!"
                     }).then((result) => {
                         if (result.isConfirmed) {

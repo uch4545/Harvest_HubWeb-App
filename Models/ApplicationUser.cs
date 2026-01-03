@@ -14,7 +14,7 @@ namespace HarvestHub.WebApp.Models
 
         // 👇 Navigation to Farmer (if needed)
         public Farmer Farmer { get; set; }
-        public string OtpCode { get; set; }
+        public string? OtpCode { get; set; }
         public DateTime OtpExpiry { get; set; }
     }
 }

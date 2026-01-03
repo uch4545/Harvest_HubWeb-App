@@ -1,6 +1,7 @@
 ﻿using Data;
 using HarvestHub.WebApp.Data;
 using HarvestHub.WebApp.Models;
+using HarvestHub.WebApp.Hubs;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
@@ -26,7 +27,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 })
 
 .AddEntityFrameworkStores<ApplicationDbContext>()
-.AddDefaultTokenProviders(); // ✅ Needed for OTP, password reset etc.
+.AddDefaultTokenProviders();
 
 // ✅ Email Settings
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
@@ -34,13 +35,9 @@ builder.Services.AddTransient<IEmailSender, EmailSender>();
 
 // ✅ Add MVC + API Controllers
 builder.Services.AddControllersWithViews();
-builder.Services.AddControllers(); // 👈 for API routes
-
-// ✅ Add Market Rate Service (HTTP Client)
+builder.Services.AddControllers(); 
 builder.Services.AddHttpClient<MarketRateService>(client =>
 {
-    // ⚙️ Replace this port with your own project's HTTPS port
-    // check from launchSettings.json or browser URL
     client.BaseAddress = new Uri("https://localhost:7290/");
 });
 builder.Services.AddCors(options =>
@@ -56,6 +53,13 @@ builder.Services
     .AddViewLocalization()
     .AddDataAnnotationsLocalization();
 
+// SignalR for real-time chat
+builder.Services.AddSignalR();
+
+// AI Chatbot Service with HttpClient
+builder.Services.AddHttpClient();
+builder.Services.AddScoped<AIChatbotService>();
+
 var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())
@@ -70,28 +74,26 @@ var localizationOptions = new RequestLocalizationOptions
     SupportedCultures = supportedCultures.Select(c => new System.Globalization.CultureInfo(c)).ToList(),
     SupportedUICultures = supportedCultures.Select(c => new System.Globalization.CultureInfo(c)).ToList()
 };
-// Add cookie provider for language persistence
 localizationOptions.RequestCultureProviders.Insert(0, new Microsoft.AspNetCore.Localization.CookieRequestCultureProvider());
 app.UseRequestLocalization(localizationOptions);
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection(); // Temporarily disabled for mobile testing
 app.UseStaticFiles();
 app.UseCors();
 
 app.UseRouting();
 
-// ✅ Authentication & Authorization
 app.UseAuthentication();
 app.UseAuthorization();
 
-// ✅ MVC default route
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-// ✅ Map API Controllers
 app.MapControllers();
 
-// ✅ Seed Roles, Admin User & Market Rates
+// SignalR Hub
+app.MapHub<ChatHub>("/chatHub");
+
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -100,8 +102,8 @@ using (var scope = app.Services.CreateScope())
     var context = services.GetRequiredService<ApplicationDbContext>();
 
     await SeedData.SeedRolesAndAdminAsync(userManager, roleManager);
-    await SeedData.SeedMarketRatesAsync(context); // 👈 added this line
+    await SeedData.SeedMarketRatesAsync(context);
+    await SeedData.SeedGovernmentSchemesAsync(context);
 }
 
-// ✅ Run the app
 app.Run();

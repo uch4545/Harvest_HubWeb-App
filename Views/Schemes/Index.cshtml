@@ -1,0 +1,297 @@
+@model List<HarvestHub.WebApp.Models.GovernmentScheme>
+@{
+    ViewData["Title"] = "Government Schemes";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var categories = ViewBag.Categories as List<string> ?? new List<string>();
+    var selectedCategory = ViewBag.SelectedCategory as string ?? "All";
+}
+
+<style>
+    .schemes-container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    
+    /* Header */
+    .schemes-header {
+        background: linear-gradient(135deg, #075e54, #128c7e);
+        color: white;
+        border-radius: 20px;
+        padding: 30px;
+        margin-bottom: 25px;
+        box-shadow: 0 10px 30px rgba(7, 94, 84, 0.3);
+        text-align: center;
+    }
+    
+    .schemes-header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+    
+    .schemes-header p {
+        opacity: 0.9;
+        font-size: 1.1rem;
+    }
+    
+    /* Filter Tabs */
+    .filter-tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 25px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .filter-tab {
+        background: white;
+        border: 2px solid #e0e0e0;
+        padding: 10px 20px;
+        border-radius: 25px;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-weight: 500;
+        text-decoration: none;
+        color: #333;
+    }
+    
+    .filter-tab:hover, .filter-tab.active {
+        background: #075e54;
+        color: white;
+        border-color: #075e54;
+    }
+    
+    /* Scheme Cards */
+    .schemes-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 20px;
+    }
+    
+    .scheme-card {
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        text-decoration: none;
+        color: inherit;
+    }
+    
+    .scheme-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+    }
+    
+    .scheme-card.featured {
+        border: 2px solid #25d366;
+    }
+    
+    .scheme-header {
+        padding: 20px;
+        background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+        position: relative;
+    }
+    
+    .scheme-icon {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+    }
+    
+    .scheme-title {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 5px;
+    }
+    
+    .scheme-title-urdu {
+        font-size: 1rem;
+        color: #666;
+        direction: rtl;
+    }
+    
+    .scheme-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    
+    .scheme-badge.active {
+        background: #25d366;
+        color: white;
+    }
+    
+    .scheme-badge.upcoming {
+        background: #f59e0b;
+        color: white;
+    }
+    
+    .scheme-badge.featured {
+        background: #6366f1;
+        color: white;
+    }
+    
+    .scheme-body {
+        padding: 20px;
+    }
+    
+    .scheme-description {
+        color: #666;
+        font-size: 0.95rem;
+        line-height: 1.5;
+        margin-bottom: 15px;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    
+    .scheme-category {
+        display: inline-block;
+        background: #e8f5e9;
+        color: #2e7d32;
+        padding: 5px 12px;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+    
+    .scheme-footer {
+        padding: 15px 20px;
+        border-top: 1px solid #f0f0f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .view-details-btn {
+        background: linear-gradient(135deg, #075e54, #128c7e);
+        color: white;
+        padding: 8px 20px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+    
+    .view-details-btn:hover {
+        transform: scale(1.05);
+        color: white;
+    }
+    
+    .scheme-date {
+        color: #888;
+        font-size: 0.8rem;
+    }
+    
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #666;
+    }
+    
+    .empty-state-icon {
+        font-size: 4rem;
+        opacity: 0.5;
+        margin-bottom: 15px;
+    }
+</style>
+
+<div class="schemes-container">
+    <!-- Header -->
+    <div class="schemes-header">
+        <h1>🏛️ Government Schemes for Farmers</h1>
+        <p>کسانوں کے لیے حکومتی سکیمیں</p>
+        <p style="margin-top: 10px; opacity: 0.8;">Pakistan Government Programs & Subsidies</p>
+    </div>
+
+    <!-- Filter Tabs -->
+    <div class="filter-tabs">
+        <a href="@Url.Action("Index", "Schemes")" class="filter-tab @(selectedCategory == "All" ? "active" : "")">
+            All / سب
+        </a>
+        @foreach (var cat in categories)
+        {
+            <a href="@Url.Action("Index", "Schemes", new { category = cat })" 
+               class="filter-tab @(selectedCategory == cat ? "active" : "")">
+                @GetCategoryIcon(cat) @cat
+            </a>
+        }
+    </div>
+
+    <!-- Schemes Grid -->
+    @if (Model != null && Model.Any())
+    {
+        <div class="schemes-grid">
+            @foreach (var scheme in Model)
+            {
+                <div class="scheme-card @(scheme.IsFeatured ? "featured" : "")">
+                    <div class="scheme-header">
+                        <div class="scheme-icon">@GetCategoryIcon(scheme.Category)</div>
+                        <div class="scheme-title">@scheme.Title</div>
+                        <div class="scheme-title-urdu">@scheme.TitleUrdu</div>
+                        
+                        @if (scheme.IsFeatured)
+                        {
+                            <span class="scheme-badge featured">⭐ Featured</span>
+                        }
+                        else if (scheme.Status == "Upcoming")
+                        {
+                            <span class="scheme-badge upcoming">🔜 Upcoming</span>
+                        }
+                        else
+                        {
+                            <span class="scheme-badge active">✅ Active</span>
+                        }
+                    </div>
+                    
+                    <div class="scheme-body">
+                        <p class="scheme-description">@scheme.Description</p>
+                        <span class="scheme-category">@scheme.Category</span>
+                    </div>
+                    
+                    <div class="scheme-footer">
+                        <a href="@Url.Action("Details", "Schemes", new { id = scheme.Id })" class="view-details-btn">
+                            View Details →
+                        </a>
+                        @if (scheme.StartDate.HasValue)
+                        {
+                            <span class="scheme-date">Since @scheme.StartDate.Value.ToString("MMM yyyy")</span>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <div class="empty-state-icon">🏛️</div>
+            <h3>No schemes available</h3>
+            <p>ابھی کوئی سکیم دستیاب نہیں</p>
+        </div>
+    }
+</div>
+
+@functions {
+    string GetCategoryIcon(string category)
+    {
+        return category switch
+        {
+            "Subsidy" => "💰",
+            "Loan" => "🏦",
+            "Insurance" => "🛡️",
+            "Training" => "📚",
+            "Equipment" => "🚜",
+            "Seeds" => "🌱",
+            "Fertilizer" => "🧪",
+            _ => "📋"
+        };
+    }
+}

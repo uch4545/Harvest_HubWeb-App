@@ -4,86 +4,303 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2 class="text-2xl font-bold text-yellow-700 mb-6">Edit Crop</h2>
+<style>
+    .form-container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
 
-<form asp-action="EditCrop" method="post" enctype="multipart/form-data"
-      class="space-y-4 bg-white p-6 rounded shadow-md">
-    <input type="hidden" asp-for="Id" />
+    .page-header {
+        margin-bottom: 30px;
+    }
 
-    <div>
-        <label asp-for="Name" class="block font-semibold">Crop Name</label>
-        <input asp-for="Name" class="w-full border px-3 py-2 rounded" />
+    .page-header h2 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 8px;
+    }
+
+    .page-header p {
+        color: #666;
+        font-size: 0.95rem;
+    }
+
+    .form-card {
+        background: white;
+        border-radius: 16px;
+        padding: 35px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+
+    .form-section {
+        margin-bottom: 30px;
+    }
+
+    .section-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #075e54;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #e8f5e9;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 8px;
+        font-size: 0.9rem;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 12px 16px;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        font-size: 1rem;
+        transition: all 0.3s;
+        outline: none;
+        background: white;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        border-color: #128c7e;
+        box-shadow: 0 0 0 4px rgba(18, 140, 126, 0.1);
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    .current-images {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-top: 10px;
+    }
+
+    .current-image {
+        width: 100px;
+        height: 100px;
+        border-radius: 10px;
+        object-fit: cover;
+        border: 2px solid #e0e0e0;
+        transition: all 0.2s;
+    }
+
+    .current-image:hover {
+        border-color: #128c7e;
+        transform: scale(1.05);
+    }
+
+    .file-input-wrapper {
+        position: relative;
+    }
+
+    .file-input-wrapper input[type="file"] {
+        cursor: pointer;
+    }
+
+    .file-input-wrapper input[type="file"]::file-selector-button {
+        background: linear-gradient(135deg, #075e54, #128c7e);
+        color: white;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        margin-right: 10px;
+    }
+
+    .submit-btn {
+        width: 100%;
+        padding: 16px;
+        background: linear-gradient(135deg, #075e54, #128c7e);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        box-shadow: 0 4px 15px rgba(7, 94, 84, 0.3);
+        margin-top: 20px;
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(7, 94, 84, 0.4);
+    }
+
+    .helper-text {
+        font-size: 0.85rem;
+        color: #666;
+        margin-top: 4px;
+    }
+
+    .no-images-text {
+        color: #999;
+        font-style: italic;
+        padding: 20px;
+        text-align: center;
+        background: #f9f9f9;
+        border-radius: 10px;
+    }
+
+    @@media (max-width: 768px) {
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+        
+        .form-card {
+            padding: 25px;
+        }
+    }
+</style>
+
+<div class="form-container">
+    <div class="page-header">
+        <h2>✏️ Edit Crop</h2>
+        <p>Update your crop details to attract more buyers</p>
     </div>
 
-    <div>
-        <label asp-for="Variety" class="block font-semibold">Variety</label>
-        <select asp-for="Variety" asp-items="Html.GetEnumSelectList<HarvestHub.WebApp.Models.CropVariety>()"
-                class="w-full border px-3 py-2 rounded"></select>
-    </div>
+    <div class="form-card">
+        <form asp-action="EditCrop" method="post" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="Id" />
 
-    <div class="grid grid-cols-2 gap-4">
-        <div>
-            <label asp-for="Quantity" class="block font-semibold">Quantity</label>
-            <input asp-for="Quantity" class="w-full border px-3 py-2 rounded" />
-        </div>
-        <div>
-            <label asp-for="Unit" class="block font-semibold">Unit</label>
-            <select asp-for="Unit" class="w-full border px-3 py-2 rounded">
-                <option value="Kg" selected="@(Model.Unit == "Kg")">Kg</option>
-                <option value="Ton" selected="@(Model.Unit == "Ton")">Ton</option>
-                <option value="Bag" selected="@(Model.Unit == "Bag")">Bag</option>
-            </select>
-        </div>
-    </div>
+            <!-- Basic Information -->
+            <div class="form-section">
+                <div class="section-title">
+                    <span>📝</span>
+                    <span>Basic Information</span>
+                </div>
 
-    <div>
-        <label asp-for="PricePerUnit" class="block font-semibold">Price Per Unit</label>
-        <input asp-for="PricePerUnit" class="w-full border px-3 py-2 rounded" />
-    </div>
+                <div class="form-group">
+                    <label asp-for="Name">Crop Name *</label>
+                    <input asp-for="Name" placeholder="e.g., Wheat, Rice, Cotton" required />
+                </div>
 
-    <div>
-        <label asp-for="Description" class="block font-semibold">Description</label>
-        <textarea asp-for="Description" class="w-full border px-3 py-2 rounded"></textarea>
-    </div>
+                <div class="form-group">
+                    <label asp-for="Variety">Variety *</label>
+                    <select asp-for="Variety" 
+                            asp-items="Html.GetEnumSelectList<HarvestHub.WebApp.Models.CropVariety>()" 
+                            required>
+                    </select>
+                </div>
 
-    <!-- Current Images -->
-    <div>
-        <label class="block font-semibold">Current Images</label>
-        <div class="flex gap-2 flex-wrap">
-            @if (Model.Images != null && Model.Images.Any())
-            {
-                foreach (var img in Model.Images)
-                {
-                    <img src="@img.ImageUrl" class="h-20 w-20 object-cover rounded border" />
-                }
-            }
-            else
-            {
-                <p class="text-gray-500">No images uploaded.</p>
-            }
-        </div>
-    </div>
+                <div class="form-group">
+                    <label asp-for="Description">Description</label>
+                    <textarea asp-for="Description" rows="4" placeholder="Provide details about crop quality, origin, harvest date, etc."></textarea>
+                </div>
+            </div>
 
-    <!-- Upload New Images -->
-    <div>
-        <label class="block font-semibold">Upload New Images</label>
-        <input type="file" name="newImages" multiple class="w-full border px-3 py-2 rounded" />
-    </div>
+            <!-- Quantity & Pricing -->
+            <div class="form-section">
+                <div class="section-title">
+                    <span>💰</span>
+                    <span>Quantity & Pricing</span>
+                </div>
 
-    <!-- Replace Report -->
-    <div>
-        <label class="block font-semibold">Replace Report</label>
-        <select name="laboratoryId" class="w-full border px-3 py-2 rounded">
-            <option value="">-- Select Lab --</option>
-            @foreach (var lab in ViewBag.Labs)
-            {
-                <option value="@lab.Id">@lab.LabName</option>
-            }
-        </select>
-        <input type="file" name="newReportFile" class="w-full border px-3 py-2 rounded mt-2" />
-    </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label asp-for="Quantity">Quantity *</label>
+                        <input asp-for="Quantity" type="number" step="0.01" required />
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Unit">Unit *</label>
+                        <select asp-for="Unit" required>
+                            <option value="Kg">Kilogram (Kg)</option>
+                            <option value="Ton">Ton</option>
+                            <option value="Bag">Bag</option>
+                            <option value="Quintal">Quintal</option>
+                        </select>
+                    </div>
+                </div>
 
-    <button type="submit" class="bg-yellow-700 text-white px-4 py-2 rounded hover:bg-yellow-800">
-        Update Crop
-    </button>
-</form>
+                <div class="form-group">
+                    <label asp-for="PricePerUnit">Price Per Unit (PKR) *</label>
+                    <input asp-for="PricePerUnit" type="number" step="0.01" required />
+                    <p class="helper-text">💡 Set a competitive price based on current market rates</p>
+                </div>
+            </div>
+
+            <!-- Current Images -->
+            <div class="form-section">
+                <div class="section-title">
+                    <span>📸</span>
+                    <span>Crop Images</span>
+                </div>
+
+                <div class="form-group">
+                    <label>Current Images</label>
+                    @if (Model.Images != null && Model.Images.Any())
+                    {
+                        <div class="current-images">
+                            @foreach (var img in Model.Images)
+                            {
+                                <img src="@img.ImageUrl" class="current-image" alt="Crop image" />
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="no-images-text">
+                            No images uploaded yet
+                        </div>
+                    }
+                </div>
+
+                <div class="form-group file-input-wrapper">
+                    <label>Add New Images</label>
+                    <input type="file" name="newImages" multiple accept="image/*" />
+                    <p class="helper-text">💡 Upload additional images to showcase your crop better</p>
+                </div>
+            </div>
+
+            <!-- Lab Report (Optional) -->
+            <div class="form-section">
+                <div class="section-title">
+                    <span>🔬</span>
+                    <span>Lab Report (Optional)</span>
+                </div>
+
+                <div class="form-group">
+                    <label>Select Laboratory</label>
+                    <select name="laboratoryId">
+                        <option value="">-- Select Lab --</option>
+                        @foreach (var lab in ViewBag.Labs)
+                        {
+                            <option value="@lab.Id">@lab.LabName</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="form-group file-input-wrapper">
+                    <label>Replace Lab Report</label>
+                    <input type="file" name="newReportFile" accept=".pdf,.jpg,.jpeg,.png" />
+                    <p class="helper-text">💡 Upload a new report to update the existing one</p>
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn">
+                💾 Update Crop
+            </button>
+        </form>
+    </div>
+</div>

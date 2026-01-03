@@ -1,0 +1,286 @@
+@model HarvestHub.WebApp.Models.GovernmentScheme
+@{
+    ViewData["Title"] = Model.Title;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .scheme-details {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+    
+    .back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: #075e54;
+        text-decoration: none;
+        font-weight: 500;
+        margin-bottom: 20px;
+        transition: color 0.2s;
+    }
+    
+    .back-btn:hover {
+        color: #128c7e;
+    }
+    
+    .scheme-hero {
+        background: linear-gradient(135deg, #075e54, #128c7e);
+        color: white;
+        border-radius: 20px;
+        padding: 40px;
+        margin-bottom: 25px;
+        box-shadow: 0 10px 30px rgba(7, 94, 84, 0.3);
+    }
+    
+    .scheme-hero-icon {
+        font-size: 3rem;
+        margin-bottom: 15px;
+    }
+    
+    .scheme-hero h1 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+    
+    .scheme-hero-urdu {
+        font-size: 1.3rem;
+        opacity: 0.9;
+        direction: rtl;
+        margin-bottom: 15px;
+    }
+    
+    .scheme-badges {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    
+    .badge {
+        padding: 6px 15px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+    
+    .badge-status {
+        background: rgba(255,255,255,0.2);
+    }
+    
+    .badge-category {
+        background: #25d366;
+    }
+    
+    .badge-featured {
+        background: #6366f1;
+    }
+    
+    .content-card {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .content-card h3 {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .content-card p {
+        color: #555;
+        line-height: 1.7;
+    }
+    
+    .content-card ul {
+        color: #555;
+        line-height: 1.8;
+        padding-left: 20px;
+    }
+    
+    .content-card li {
+        margin-bottom: 8px;
+    }
+    
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+    }
+    
+    .info-item {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 10px;
+        border-left: 4px solid #128c7e;
+    }
+    
+    .info-label {
+        font-size: 0.85rem;
+        color: #888;
+        margin-bottom: 5px;
+    }
+    
+    .info-value {
+        font-weight: 600;
+        color: #1a1a1a;
+    }
+    
+    .apply-btn {
+        display: inline-block;
+        background: linear-gradient(135deg, #075e54, #25d366);
+        color: white;
+        padding: 15px 40px;
+        border-radius: 30px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s;
+        box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+    }
+    
+    .apply-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4);
+        color: white;
+    }
+    
+    .urdu-text {
+        direction: rtl;
+        text-align: right;
+        color: #666;
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px dashed #ddd;
+    }
+</style>
+
+<div class="scheme-details">
+    <!-- Back Button -->
+    <a href="@Url.Action("Index", "Schemes")" class="back-btn">
+        ← Back to Schemes / واپس
+    </a>
+
+    <!-- Hero Section -->
+    <div class="scheme-hero">
+        <div class="scheme-hero-icon">@GetCategoryIcon(Model.Category)</div>
+        <h1>@Model.Title</h1>
+        <div class="scheme-hero-urdu">@Model.TitleUrdu</div>
+        
+        <div class="scheme-badges">
+            <span class="badge badge-status">@Model.Status</span>
+            <span class="badge badge-category">@Model.Category</span>
+            @if (Model.IsFeatured)
+            {
+                <span class="badge badge-featured">⭐ Featured</span>
+            }
+        </div>
+    </div>
+
+    <!-- Description -->
+    <div class="content-card">
+        <h3>📋 Description / تفصیل</h3>
+        <p>@Model.Description</p>
+        @if (!string.IsNullOrEmpty(Model.DescriptionUrdu))
+        {
+            <p class="urdu-text">@Model.DescriptionUrdu</p>
+        }
+    </div>
+
+    <!-- Eligibility -->
+    @if (!string.IsNullOrEmpty(Model.Eligibility))
+    {
+        <div class="content-card">
+            <h3>✅ Eligibility / اہلیت</h3>
+            <p>@Model.Eligibility</p>
+        </div>
+    }
+
+    <!-- Benefits -->
+    @if (!string.IsNullOrEmpty(Model.Benefits))
+    {
+        <div class="content-card">
+            <h3>🎁 Benefits / فوائد</h3>
+            <p>@Model.Benefits</p>
+        </div>
+    }
+
+    <!-- How to Apply -->
+    @if (!string.IsNullOrEmpty(Model.HowToApply))
+    {
+        <div class="content-card">
+            <h3>📝 How to Apply / درخواست کا طریقہ</h3>
+            <p>@Model.HowToApply</p>
+        </div>
+    }
+
+    <!-- Contact Info -->
+    @if (!string.IsNullOrEmpty(Model.ContactInfo))
+    {
+        <div class="content-card">
+            <h3>📞 Contact Information / رابطہ</h3>
+            <p>@Model.ContactInfo</p>
+        </div>
+    }
+
+    <!-- Info Grid -->
+    <div class="content-card">
+        <h3>ℹ️ Scheme Information</h3>
+        <div class="info-grid">
+            @if (Model.StartDate.HasValue)
+            {
+                <div class="info-item">
+                    <div class="info-label">Start Date / شروع</div>
+                    <div class="info-value">@Model.StartDate.Value.ToString("MMMM dd, yyyy")</div>
+                </div>
+            }
+            @if (Model.EndDate.HasValue)
+            {
+                <div class="info-item">
+                    <div class="info-label">End Date / اختتام</div>
+                    <div class="info-value">@Model.EndDate.Value.ToString("MMMM dd, yyyy")</div>
+                </div>
+            }
+            <div class="info-item">
+                <div class="info-label">Last Updated / آخری تازہ کاری</div>
+                <div class="info-value">@Model.UpdatedAt.ToString("MMM dd, yyyy")</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Apply Button -->
+    @if (!string.IsNullOrEmpty(Model.OfficialLink))
+    {
+        <div class="text-center mt-4 mb-4">
+            <a href="@Model.OfficialLink" target="_blank" class="apply-btn">
+                🔗 Apply Now / ابھی درخواست دیں
+            </a>
+        </div>
+    }
+</div>
+
+@functions {
+    string GetCategoryIcon(string category)
+    {
+        return category switch
+        {
+            "Subsidy" => "💰",
+            "Loan" => "🏦",
+            "Insurance" => "🛡️",
+            "Training" => "📚",
+            "Equipment" => "🚜",
+            "Seeds" => "🌱",
+            "Fertilizer" => "🧪",
+            _ => "📋"
+        };
+    }
+}

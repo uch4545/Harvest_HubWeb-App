@@ -4,42 +4,275 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1 class="text-2xl font-bold mb-6">Manage Products</h1>
-
-<table class="table-auto w-full border border-gray-300 text-sm">
-    <thead class="bg-gray-100">
-        <tr>
-            <th class="px-3 py-2">Crop Name</th>
-            <th class="px-3 py-2">Variety </th>
-            <th class="px-3 py-2">Quantity</th>
-            <th class="px-3 py-2">Price</th>
-            <th class="px-3 py-2">Farmer</th>
-            <th class="px-3 py-2">Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var crop in Model)
-        {
-            <tr class="border-b hover:bg-gray-50">
-                <td class="px-3 py-2 font-medium">@crop.Name</td>
-                <td class="px-3 py-2">@crop.Variety </td>
-                <td class="px-3 py-2">@crop.Quantity  @crop.Unit </td>
-                <td class="px-3 py-2">Rs. @crop.PricePerUnit </td>
-                <td class="px-3 py-2">@crop.Farmer?.FullName</td>
-                <td class="px-3 py-2 space-x-2">
-                    <a asp-action="EditCrop" asp-route-id="@crop.Id"
-                       class="bg-blue-600 text-white px-2 py-1 rounded">Edit</a>
-
-                    <form asp-action="DeleteCrop" asp-route-id="@crop.Id" method="post"
-                          class="inline delete-form" data-cropname="@crop.Name">
-                        <button type="submit" class="bg-red-600 text-white px-2 py-1 rounded">Delete</button>
-                    </form>
-                </td>
-            </tr>
+<style>
+    .admin-page {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    /* Page Header */
+    .page-header {
+        background: linear-gradient(135deg, #075e54, #128c7e);
+        color: white;
+        border-radius: 20px;
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px rgba(7, 94, 84, 0.3);
+    }
+    
+    .page-header h1 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    /* Content Section */
+    .content-section {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    /* Modern Table */
+    .products-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        margin-top: 20px;
+    }
+    
+    .products-table thead {
+        background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+    }
+    
+    .products-table th {
+        padding: 15px;
+        text-align: left;
+        font-weight: 600;
+        color: #075e54;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .products-table th:first-child {
+        border-radius: 10px 0 0 0;
+    }
+    
+    .products-table th:last-child {
+        border-radius: 0 10px 0 0;
+    }
+    
+    .products-table tbody tr {
+        transition: all 0.3s ease;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .products-table tbody tr:hover {
+        background: #f8fffe;
+        transform: translateY(-2px);
+        box-shadow: 0 2px 8px rgba(7, 94, 84, 0.1);
+    }
+    
+    .products-table td {
+        padding: 15px;
+        color: #333;
+    }
+    
+    /* Product Name */
+    .product-name {
+        font-weight: 600;
+        color: #1a1a1a;
+        font-size: 1rem;
+    }
+    
+    .product-variety {
+        color: #666;
+        font-size: 0.85rem;
+        margin-top: 3px;
+    }
+    
+    /* Price Highlight */
+    .product-price {
+        background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+        color: #075e54;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-weight: 700;
+        display: inline-block;
+    }
+    
+    /* Farmer Info */
+    .farmer-info {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .farmer-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #075e54, #128c7e);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 0.8rem;
+    }
+    
+    /* Action Buttons */
+    .action-buttons {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+    
+    .btn-action {
+        padding: 8px 16px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+    }
+    
+    .btn-delete {
+        background: linear-gradient(135deg, #f44336, #ef5350);
+        color: white;
+    }
+    
+    .btn-delete:hover {
+        background: linear-gradient(135deg, #d32f2f, #f44336);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+    }
+    
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #666;
+    }
+    
+    .empty-icon {
+        font-size: 4rem;
+        margin-bottom: 15px;
+        opacity: 0.5;
+    }
+    
+    /* Inline Form */
+    .inline {
+        display: inline;
+    }
+    
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .admin-page {
+            padding: 10px;
         }
-    </tbody>
+        
+        .page-header {
+            padding: 20px;
+        }
+        
+        .page-header h1 {
+            font-size: 1.4rem;
+        }
+        
+        .content-section {
+            padding: 15px;
+            overflow-x: auto;
+        }
+        
+        .products-table {
+            min-width: 800px;
+        }
+    }
+</style>
 
-</table>
+<div class="admin-page">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1>📦 Manage Products / پراڈکٹس کو منظم کریں</h1>
+    </div>
+
+    <!-- Content Section -->
+    <div class="content-section">
+        @if (Model != null && Model.Any())
+        {
+            <table class="products-table">
+                <thead>
+                    <tr>
+                        <th>Crop Name / فصل کا نام</th>
+                        <th>Variety / قسم</th>
+                        <th>Quantity / مقدار</th>
+                        <th>Price / قیمت</th>
+                        <th>Farmer / کسان</th>
+                        <th>Actions / اعمال</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var crop in Model)
+                    {
+                        <tr>
+                            <td>
+                                <div class="product-name">@crop.Name</div>
+                            </td>
+                            <td>
+                                <div class="product-variety">@crop.Variety</div>
+                            </td>
+                            <td>@crop.Quantity @crop.Unit</td>
+                            <td>
+                                <span class="product-price">Rs. @crop.PricePerUnit</span>
+                            </td>
+                            <td>
+                                @if (crop.Farmer != null)
+                                {
+                                    <div class="farmer-info">
+                                        <div class="farmer-avatar">
+                                            @(crop.Farmer.FullName?.Substring(0, 1).ToUpper() ?? "F")
+                                        </div>
+                                        <span>@crop.Farmer.FullName</span>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <span style="color: #999;">N/A</span>
+                                }
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <form asp-action="DeleteCrop" asp-route-id="@crop.Id" method="post" class="inline delete-form" data-cropname="@crop.Name">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn-action btn-delete">🗑️ Delete</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="empty-state">
+                <div class="empty-icon">📦</div>
+                <h3>No Products Found</h3>
+                <p>کوئی پراڈکٹ نہیں ملا</p>
+            </div>
+        }
+    </div>
+</div>
+
 @section Scripts {
     <script>
         document.addEventListener("DOMContentLoaded", function () {

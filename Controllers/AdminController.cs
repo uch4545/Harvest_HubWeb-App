@@ -106,6 +106,65 @@ namespace HarvestHub.Controllers
 
         #endregion ---------------- Dashboard ----------------
 
+        #region ---------------- Manage Products/Crops ----------------
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteCrop(int id)
+        {
+            try
+            {
+                var crop = await _context.Crops
+                    .Include(c => c.Images)
+                    .Include(c => c.Farmer)
+                    .FirstOrDefaultAsync(c => c.Id == id);
+                
+                if (crop == null) 
+                {
+                    TempData["ErrorMessage"] = "Crop not found.";
+                    return RedirectToAction("ManageProducts");
+                }
+
+                // Store farmer info and crop name before deletion
+                var farmerId = crop.FarmerId;
+                var cropName = crop.Name;
+
+                // Delete associated images
+                if (crop.Images != null && crop.Images.Any())
+                {
+                    _context.CropImages.RemoveRange(crop.Images);
+                }
+
+                _context.Crops.Remove(crop);
+                await _context.SaveChangesAsync();
+
+                // Send notification to farmer
+                var notification = new Notification
+                {
+                    FarmerId = farmerId,
+                    NotificationType = "CropDeleted",
+                    CropName = cropName,
+                    Message = $"Your crop '{cropName}' has been deleted by the Administrator. / آپ کی فصل '{cropName}' کو منتظم نے حذف کر دیا ہے۔",
+                    CreatedAt = DateTime.UtcNow,
+                    IsRead = false
+                };
+
+                _context.Notifications.Add(notification);
+                await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = $"Crop '{cropName}' deleted successfully!";
+                return RedirectToAction("ManageProducts");
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "An error occurred while deleting crop. Please try again.";
+                LogError("DeleteCrop", ex);
+                return RedirectToAction("ManageProducts");
+            }
+        }
+
+        #endregion ---------------- Manage Products/Crops ----------------
+
         #region ---------------- ManageLabs ----------------
 
         public async Task<IActionResult> ManageLabs()
@@ -251,7 +310,7 @@ namespace HarvestHub.Controllers
                 _context.ErrorLogs.Add(error);
                 _context.SaveChanges();
             }
-            catch { /* Fail silently to avoid recursive errors */ }
+            catch {  }
         }
         #endregion
     }

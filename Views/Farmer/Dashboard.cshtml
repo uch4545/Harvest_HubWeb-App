@@ -49,6 +49,13 @@
         justify-content: center;
         font-size: 2rem;
         font-weight: bold;
+        overflow: hidden;
+    }
+    
+    .user-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
     }
     
     /* Quick Actions */
@@ -196,7 +203,14 @@
     <div class="welcome-card">
         <div class="user-info">
             <div class="user-avatar">
-                @(Model.FullName?.Substring(0, 1).ToUpper() ?? "F")
+                @if (!string.IsNullOrEmpty(ViewBag.ProfileImagePath))
+                {
+                    <img src="@ViewBag.ProfileImagePath" alt="Profile" />
+                }
+                else
+                {
+                    @(Model.FullName?. Substring(0, 1).ToUpper() ?? "F")
+                }
             </div>
             <div>
                 <h2>Welcome, @Model.FullName! 🌾</h2>
@@ -205,6 +219,20 @@
             </div>
         </div>
     </div>
+
+    <!-- Success/Error Messages -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div style="background: #d4edda; color: #155724; padding: 15px 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #28a745;">
+            ✅ @TempData["SuccessMessage"]
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div style="background: #f8d7da; color: #721c24; padding: 15px 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #dc3545;">
+            ❌ @TempData["ErrorMessage"]
+        </div>
+    }
 
     <!-- Quick Actions -->
     <div class="quick-actions">
@@ -242,11 +270,6 @@
             <div class="action-title">Lab Reports</div>
             <div class="action-subtitle">لیب رپورٹس</div>
         </a>
-        <a href="#" onclick="event.preventDefault(); document.getElementById('logoutForm').submit();" class="action-card">
-            <div class="action-icon">🚪</div>
-            <div class="action-title">Logout</div>
-            <div class="action-subtitle">لاگ آؤٹ</div>
-        </a>
     </div>
 
     <!-- Stats Section -->
@@ -282,3 +305,39 @@
         @Html.AntiForgeryToken()
     </form>
 </div>
+
+<script>
+    // Logout confirmation function
+    function confirmLogout() {
+        Swal.fire({
+            title: 'Are you sure?',
+            html: '<p style="margin: 10px 0;">کیا آپ لاگ آؤٹ کرنا چاہتے ہیں؟</p>',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc2626',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Yes, Logout / ہاں',
+            cancelButtonText: 'Cancel / منسوخ',
+            customClass: {
+                popup: 'swal-wide'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Show loading
+                Swal.fire({
+                    title: 'Logging out...',
+                    html: '<p style="margin: 10px 0;">لاگ آؤٹ ہو رہا ہے...</p>',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    showConfirmButton: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                
+                // Submit logout form
+                document.getElementById('logoutForm').submit();
+            }
+        });
+    }
+</script>

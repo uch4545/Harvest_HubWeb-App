@@ -59,16 +59,36 @@ namespace HarvestHub.WebApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(string email, string password)
         {
-            var user = await _userManager.FindByEmailAsync(email);
-            if (user != null)
+            try
             {
-                var result = await _signInManager.PasswordSignInAsync(user.Email, password, false, false);
-                if (result.Succeeded)
-                    return RedirectToAction("Dashboard");
-            }
+                if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
+                {
+                    TempData["Error"] = "❌ Email and Password are required. / ای میل اور پاس ورڈ درکار ہیں۔";
+                    return View();
+                }
 
-            ModelState.AddModelError("", "Invalid login attempt.");
-            return View();
+                var user = await _userManager.FindByEmailAsync(email);
+                if (user == null)
+                {
+                    TempData["Error"] = "❌ Invalid email or password. Please check your credentials. / غلط ای میل یا پاس ورڈ۔ براہ کرم اپنی تفصیلات چیک کریں۔";
+                    return View();
+                }
+
+                var result = await _signInManager.PasswordSignInAsync(user.Email, password, false, false);
+                if (!result.Succeeded)
+                {
+                    TempData["Error"] = "❌ Invalid email or password. Please check your credentials. / غلط ای میل یا پاس ورڈ۔ براہ کرم اپنی تفصیلات چیک کریں۔";
+                    return View();
+                }
+
+                return RedirectToAction("Dashboard");
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "❌ An error occurred during login. Please try again. / لاگ ان کے دوران ایک خرابی پیش آئی۔ دوبارہ کوشش کریں۔";
+                LogError("Login", ex);
+                return View();
+            }
         }
 
         #endregion
@@ -175,6 +195,7 @@ namespace HarvestHub.WebApp.Controllers
                 ViewBag.ActiveListings = activeListings;
                 ViewBag.Messages = messages;
                 ViewBag.LabReports = labReports;
+                ViewBag.ProfileImagePath = farmer.ProfileImagePath; // For sidebar and dashboard
 
                 return View(farmer);
             }
@@ -245,6 +266,15 @@ namespace HarvestHub.WebApp.Controllers
                 if (farmer == null)
                 {
                     ModelState.AddModelError("", "Farmer record not found.");
+                    ViewBag.Labs = _context.Laboratories.Where(l => l.IsVerified).ToList();
+                    return View(model);
+                }
+
+                // Validate lab report is required
+                if (reportFile == null || reportFile.Length == 0 || laboratoryId <= 0)
+                {
+                    TempData["ErrorMessage"] = "Lab report is required. Please select a laboratory and upload a lab report file.";
+                    ViewBag.Labs = _context.Laboratories.Where(l => l.IsVerified).ToList();
                     return View(model);
                 }
 
@@ -320,6 +350,7 @@ namespace HarvestHub.WebApp.Controllers
 
 
         // GET: Edit Crop
+        [Authorize(Roles = "Farmer,Admin")]
         public async Task<IActionResult> EditCrop(int id)
         {
             try
@@ -342,6 +373,7 @@ namespace HarvestHub.WebApp.Controllers
             }
         }
 
+        [Authorize(Roles = "Farmer,Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditCrop(
@@ -355,22 +387,32 @@ namespace HarvestHub.WebApp.Controllers
                 var user = await _userManager.GetUserAsync(User);
                 var farmer = await _context.Farmers.FirstOrDefaultAsync(f => f.ApplicationUserId == user.Id);
 
+                // If Admin, get the farmer who owns this crop
+                if (User.IsInRole("Admin") && farmer == null)
+                {
+                    var crop = await _context.Crops.Include(c => c.Farmer).FirstOrDefaultAsync(c => c.Id == model.Id);
+                    if (crop != null)
+                    {
+                        farmer = crop.Farmer;
+                    }
+                }
+
                 if (farmer == null) return Unauthorized();
 
-                var crop = await _context.Crops
+                var existingCrop = await _context.Crops
                                          .Include(c => c.Images)
                                          .FirstOrDefaultAsync(c => c.Id == model.Id);
 
-                if (crop == null) return NotFound();
+                if (existingCrop == null) return NotFound();
 
                 // Update basic fields
-                crop.Name = model.Name;
-                crop.Variety = model.Variety;
-                crop.Quantity = model.Quantity;
-                crop.Unit = model.Unit;
-                crop.PricePerUnit = model.PricePerUnit;
-                crop.Description = model.Description;
-                crop.FarmerId = farmer.Id;
+                existingCrop.Name = model.Name;
+                existingCrop.Variety = model.Variety;
+                existingCrop.Quantity = model.Quantity;
+                existingCrop.Unit = model.Unit;
+                existingCrop.PricePerUnit = model.PricePerUnit;
+                existingCrop.Description = model.Description;
+                existingCrop.FarmerId = farmer.Id;
 
                 // Replace report if uploaded
                 if (newReportFile != null && newReportFile.Length > 0 && laboratoryId > 0)
@@ -396,7 +438,7 @@ namespace HarvestHub.WebApp.Controllers
                     _context.LabReports.Add(report);
                     await _context.SaveChangesAsync();
 
-                    crop.ReportId = report.Id;
+                    existingCrop.ReportId = report.Id;
                 }
 
                 // Add new images
@@ -418,24 +460,34 @@ namespace HarvestHub.WebApp.Controllers
 
                             _context.CropImages.Add(new CropImage
                             {
-                                CropId = crop.Id,
+                                CropId = existingCrop.Id,
                                 ImageUrl = "/crop-images/" + Path.GetFileName(imgPath)
                             });
                         }
                     }
                 }
 
-                _context.Crops.Update(crop);
+                _context.Crops.Update(existingCrop);
                 await _context.SaveChangesAsync();
 
                 TempData["SuccessMessage"] = "Crop updated successfully!";
-                return RedirectToAction("MyCrops");
+                
+                // Redirect based on role
+                if (User.IsInRole("Admin"))
+                    return RedirectToAction("ManageProducts", "Admin");
+                else
+                    return RedirectToAction("MyCrops");
             }
             catch (Exception ex)
             {
                 TempData["ErrorMessage"] = "An error occurred while updating crop. Please try again.";
                 LogError("EditCrop_POST", ex);
-                return RedirectToAction("MyCrops");
+                
+                // Redirect based on role
+                if (User.IsInRole("Admin"))
+                    return RedirectToAction("ManageProducts", "Admin");
+                else
+                    return RedirectToAction("MyCrops");
             }
         }
 
@@ -447,11 +499,34 @@ namespace HarvestHub.WebApp.Controllers
         {
             try
             {
-                var crop = await _context.Crops.FindAsync(id);
-                if (crop == null) return NotFound();
+                var crop = await _context.Crops
+                    .Include(c => c.Images)
+                    .FirstOrDefaultAsync(c => c.Id == id);
+                    
+                if (crop == null)
+                {
+                    TempData["ErrorMessage"] = "Crop not found.";
+                    return RedirectToAction("MyCrops");
+                }
 
+                // Check if there are any orders for this crop
+                var hasOrders = await _context.Orders.AnyAsync(o => o.CropId == id);
+                if (hasOrders)
+                {
+                    TempData["ErrorMessage"] = "Cannot delete this crop. There are existing orders for this crop.";
+                    return RedirectToAction("MyCrops");
+                }
+
+                // Delete associated images first
+                if (crop.Images != null && crop.Images.Any())
+                {
+                    _context.CropImages.RemoveRange(crop.Images);
+                }
+
+                // Delete the crop
                 _context.Crops.Remove(crop);
                 await _context.SaveChangesAsync();
+                
                 TempData["SuccessMessage"] = "Crop deleted successfully!";
                 return RedirectToAction("MyCrops");
             }
@@ -497,17 +572,20 @@ namespace HarvestHub.WebApp.Controllers
                 var user = await _userManager.GetUserAsync(User);
                 var farmer = await _context.Farmers.FirstOrDefaultAsync(f => f.ApplicationUserId == user.Id);
 
-                var reports = await (from r in _context.LabReports
-                                     join c in _context.Crops on r.Id equals c.ReportId into cropGroup
-                                     from crop in cropGroup.DefaultIfEmpty()
-                                     where r.FarmerId == farmer.Id
-                                     select new ReportViewModel
-                                     {
-                                         Report = r,
-                                         Crop = crop,
-                                         Laboratory = r.Laboratory
-                                     })
-                                     .ToListAsync();
+                // Get all unique lab reports for this farmer
+                var labReports = await _context.LabReports
+                    .Where(r => r.FarmerId == farmer.Id)
+                    .Include(r => r.Laboratory)
+                    .Distinct()
+                    .ToListAsync();
+
+                // Map to view model with associated crops
+                var reports = labReports.Select(r => new ReportViewModel
+                {
+                    Report = r,
+                    Crop = _context.Crops.FirstOrDefault(c => c.ReportId == r.Id),
+                    Laboratory = r.Laboratory
+                }).ToList();
 
                 return View(reports);
             }
@@ -533,21 +611,44 @@ namespace HarvestHub.WebApp.Controllers
                 if (farmer == null)
                     return RedirectToAction("Register");
 
+                // Get all notifications - handle ones with and without orders separately
                 var notifications = await _context.Notifications
-                    .Include(n => n.Order)
-                        .ThenInclude(o => o.Crop)
-                            .ThenInclude(c => c.Images)
-                    .Include(n => n.Order.Buyer)
                     .Where(n => n.FarmerId == farmer.Id)
                     .OrderByDescending(n => n.CreatedAt)
                     .ToListAsync();
+
+                // Load related data for notifications that have orders
+                foreach (var notification in notifications.Where(n => n.OrderId.HasValue))
+                {
+                    await _context.Entry(notification)
+                        .Reference(n => n.Order)
+                        .LoadAsync();
+
+                    if (notification.Order != null)
+                    {
+                        await _context.Entry(notification.Order)
+                            .Reference(o => o.Crop)
+                            .LoadAsync();
+
+                        await _context.Entry(notification.Order)
+                            .Reference(o => o.Buyer)
+                            .LoadAsync();
+
+                        if (notification.Order.Crop != null)
+                        {
+                            await _context.Entry(notification.Order.Crop)
+                                .Collection(c => c.Images)
+                                .LoadAsync();
+                        }
+                    }
+                }
 
                 ViewBag.FarmerName = farmer.FullName;
                 return View(notifications);
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = "An error occurred while loading notifications. Please try again.";
+                TempData["ErrorMessage"] = $"An error occurred while loading notifications: {ex.Message}";
                 LogError("Notifications", ex);
                 return RedirectToAction("Dashboard");
             }
@@ -617,6 +718,121 @@ namespace HarvestHub.WebApp.Controllers
             {
                 TempData["ErrorMessage"] = "An error occurred while rejecting the order. Please try again.";
                 LogError("RejectOrder", ex);
+                return RedirectToAction("Notifications");
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CancelOrderByFarmer(int orderId, int notificationId)
+        {
+            try
+            {
+                var user = await _userManager.GetUserAsync(User);
+                var farmer = await _context.Farmers.FirstOrDefaultAsync(f => f.ApplicationUserId == user.Id);
+
+                if (farmer == null)
+                    return RedirectToAction("Register");
+
+                var order = await _context.Orders
+                    .Include(o => o.Crop)
+                    .Include(o => o.Buyer)
+                    .FirstOrDefaultAsync(o => o.Id == orderId && o.Crop.FarmerId == farmer.Id);
+
+                if (order == null)
+                {
+                    TempData["ErrorMessage"] = "Order not found.";
+                    return RedirectToAction("Notifications");
+                }
+
+                // Check if order can be cancelled (only Accepted orders)
+                if (order.Status != "Accepted")
+                {
+                    TempData["ErrorMessage"] = "This order cannot be cancelled. Only accepted orders can be cancelled.";
+                    return RedirectToAction("Notifications");
+                }
+
+                // Update order status to Cancelled
+                order.Status = "Cancelled";
+
+                // Mark notification as read
+                var notification = await _context.Notifications.FindAsync(notificationId);
+                if (notification != null)
+                {
+                    notification.IsRead = true;
+                }
+
+                await _context.SaveChangesAsync();
+
+                // Note: Buyer notifications will be handled separately via notification checks
+                TempData["SuccessMessage"] = "Order cancelled successfully!";
+                return RedirectToAction("Notifications");
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "An error occurred while cancelling the order. Please try again.";
+                LogError("CancelOrderByFarmer", ex);
+                return RedirectToAction("Notifications");
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteNotificationOrder(int notificationId, int? orderId)
+        {
+            try
+            {
+                var user = await _userManager.GetUserAsync(User);
+                var farmer = await _context.Farmers.FirstOrDefaultAsync(f => f.ApplicationUserId == user.Id);
+
+                if (farmer == null)
+                    return RedirectToAction("Register");
+
+                // Delete the order if specified (must delete all notifications first)
+                if (orderId.HasValue)
+                {
+                    var order = await _context.Orders
+                        .Include(o => o.Crop)
+                        .FirstOrDefaultAsync(o => o.Id == orderId.Value && o.Crop.FarmerId == farmer.Id);
+
+                    if (order != null)
+                    {
+                        // Delete ALL notifications related to this order FIRST (foreign key constraint)
+                        var allRelatedNotifications = await _context.Notifications
+                            .Where(n => n.OrderId == orderId.Value)
+                            .ToListAsync();
+
+                        if (allRelatedNotifications.Any())
+                        {
+                            _context.Notifications.RemoveRange(allRelatedNotifications);
+                            await _context.SaveChangesAsync(); // Save notification deletions first
+                        }
+
+                        // Now delete the order
+                        _context.Orders.Remove(order);
+                        await _context.SaveChangesAsync();
+                    }
+                }
+                else
+                {
+                    // Just delete the single notification
+                    var notification = await _context.Notifications
+                        .FirstOrDefaultAsync(n => n.Id == notificationId && n.FarmerId == farmer.Id);
+
+                    if (notification != null)
+                    {
+                        _context.Notifications.Remove(notification);
+                        await _context.SaveChangesAsync();
+                    }
+                }
+
+                TempData["SuccessMessage"] = "Notification/Order removed successfully!";
+                return RedirectToAction("Notifications");
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"An error occurred while deleting: {ex.Message}";
+                LogError("DeleteNotificationOrder", ex);
                 return RedirectToAction("Notifications");
             }
         }

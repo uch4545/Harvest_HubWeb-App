@@ -4,52 +4,291 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1 class="text-2xl font-bold mb-6">Verify User Documents</h1>
-
-<table class="table-auto w-full border border-gray-300 text-sm">
-    <thead class="bg-gray-100">
-        <tr>
-            <th class="px-3 py-2">UserId</th>
-            <th class="px-3 py-2">Type</th>
-            <th class="px-3 py-2">File</th>
-            <th class="px-3 py-2">Status</th>
-            <th class="px-3 py-2">Submitted At</th>
-            <th class="px-3 py-2">Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var doc in Model)
-        {
-            <tr class="border-b">
-                <td class="px-3 py-2">@doc.UserId</td>
-                <td class="px-3 py-2">@doc.DocumentType</td>
-                <td class="px-3 py-2">
-                    <a href="@doc.FilePath" target="_blank" class="text-blue-600 underline">View</a>
-                </td>
-                <td class="px-3 py-2">
-                    @if (doc.Status == HarvestHub.WebApp.Models.VerificationStatus.Pending)
-                    {
-                        <span class="bg-yellow-500 text-white px-2 py-1 rounded">Pending</span>
-                    }
-                    else if (doc.Status == HarvestHub.WebApp.Models.VerificationStatus.Approved)
-                    {
-                        <span class="bg-green-600 text-white px-2 py-1 rounded">Approved</span>
-                    }
-                    else
-                    {
-                        <span class="bg-red-600 text-white px-2 py-1 rounded">Rejected</span>
-                    }
-                </td>
-                <td class="px-3 py-2">@doc.SubmittedAt.ToString("g")</td>
-                <td class="px-3 py-2">
-                    <form asp-action="ApproveDocument" method="post" asp-route-id="@doc.Id" class="inline">
-                        <button type="submit" class="bg-green-600 text-white px-3 py-1 rounded">Approve</button>
-                    </form>
-                    <form asp-action="RejectDocument" method="post" asp-route-id="@doc.Id" class="inline ml-2">
-                        <button type="submit" class="bg-red-600 text-white px-3 py-1 rounded">Reject</button>
-                    </form>
-                </td>
-            </tr>
+<style>
+    .admin-page {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    /* Page Header */
+    .page-header {
+        background: linear-gradient(135deg, #075e54, #128c7e);
+        color: white;
+        border-radius: 20px;
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px rgba(7, 94, 84, 0.3);
+    }
+    
+    .page-header h1 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    /* Content Section */
+    .content-section {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    /* Modern Table */
+    .documents-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+    
+    .documents-table thead {
+        background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+    }
+    
+    .documents-table th {
+        padding: 15px;
+        text-align: left;
+        font-weight: 600;
+        color: #075e54;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .documents-table th:first-child {
+        border-radius: 10px 0 0 0;
+    }
+    
+    .documents-table th:last-child {
+        border-radius: 0 10px 0 0;
+    }
+    
+    .documents-table tbody tr {
+        transition: all 0.3s ease;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .documents-table tbody tr:hover {
+        background: #f8fffe;
+        transform: translateY(-2px);
+        box-shadow: 0 2px 8px rgba(7, 94, 84, 0.1);
+    }
+    
+    .documents-table td {
+        padding: 15px;
+        color: #333;
+    }
+    
+    /* User ID Badge */
+    .user-id-badge {
+        background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+        color: #075e54;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        display: inline-block;
+    }
+    
+    /* Document Type */
+    .doc-type {
+        font-weight: 600;
+        color: #1a1a1a;
+    }
+    
+    /* View File Link */
+    .view-file-link {
+        color: #128c7e;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .view-file-link:hover {
+        color: #075e54;
+        text-decoration: underline;
+    }
+    
+    /* Status Badges */
+    .status-badge {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .status-pending {
+        background: linear-gradient(135deg, #ff9800, #ffb74d);
+        color: white;
+    }
+    
+    .status-approved {
+        background: linear-gradient(135deg, #4caf50, #66bb6a);
+        color: white;
+    }
+    
+    .status-rejected {
+        background: linear-gradient(135deg, #f44336, #ef5350);
+        color: white;
+    }
+    
+    /* Action Buttons */
+    .action-buttons {
+        display: flex;
+        gap: 8px;
+    }
+    
+    .btn-action {
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+    }
+    
+    .btn-approve {
+        background: linear-gradient(135deg, #4caf50, #66bb6a);
+        color: white;
+    }
+    
+    .btn-approve:hover {
+        background: linear-gradient(135deg, #388e3c, #4caf50);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+    }
+    
+    .btn-reject {
+        background: linear-gradient(135deg, #f44336, #ef5350);
+        color: white;
+    }
+    
+    .btn-reject:hover {
+        background: linear-gradient(135deg, #d32f2f, #f44336);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+    }
+    
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #666;
+    }
+    
+    .empty-icon {
+        font-size: 4rem;
+        margin-bottom: 15px;
+        opacity: 0.5;
+    }
+    
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .admin-page {
+            padding: 10px;
         }
-    </tbody>
-</table>
+        
+        .page-header {
+            padding: 20px;
+        }
+        
+        .page-header h1 {
+            font-size: 1.4rem;
+        }
+        
+        .content-section {
+            padding: 15px;
+            overflow-x: auto;
+        }
+        
+        .documents-table {
+            min-width: 800px;
+        }
+    }
+</style>
+
+<div class="admin-page">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1>📄 Verify User Documents / دستاویزات کی تصدیق</h1>
+    </div>
+
+    <!-- Content Section -->
+    <div class="content-section">
+        @if (Model != null && Model.Any())
+        {
+            <table class="documents-table">
+                <thead>
+                    <tr>
+                        <th>User ID</th>
+                        <th>Document Type / قسم</th>
+                        <th>File / فائل</th>
+                        <th>Status / حیثیت</th>
+                        <th>Submitted / جمع کرایا</th>
+                        <th>Actions / اعمال</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var doc in Model)
+                    {
+                        <tr>
+                            <td>
+                                <span class="user-id-badge">@doc.UserId</span>
+                            </td>
+                            <td class="doc-type">@doc.DocumentType</td>
+                            <td>
+                                <a href="@doc.FilePath" target="_blank" class="view-file-link">
+                                    📎 View File
+                                </a>
+                            </td>
+                            <td>
+                                @if (doc.Status == HarvestHub.WebApp.Models.VerificationStatus.Pending)
+                                {
+                                    <span class="status-badge status-pending">⏳ Pending</span>
+                                }
+                                else if (doc.Status == HarvestHub.WebApp.Models.VerificationStatus.Approved)
+                                {
+                                    <span class="status-badge status-approved">✓ Approved</span>
+                                }
+                                else
+                                {
+                                    <span class="status-badge status-rejected">✗ Rejected</span>
+                                }
+                            </td>
+                            <td style="color: #666;">@doc.SubmittedAt.ToString("MMM dd, yyyy")</td>
+                            <td>
+                                <div class="action-buttons">
+                                    <form asp-action="ApproveDocument" method="post" asp-route-id="@doc.Id" style="display: inline;">
+                                        <button type="submit" class="btn-action btn-approve">✓ Approve</button>
+                                    </form>
+                                    <form asp-action="RejectDocument" method="post" asp-route-id="@doc.Id" style="display: inline;">
+                                        <button type="submit" class="btn-action btn-reject">✗ Reject</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="empty-state">
+                <div class="empty-icon">📄</div>
+                <h3>No Documents to Verify</h3>
+                <p>کوئی دستاویزات نہیں ملے</p>
+            </div>
+        }
+    </div>
+</div>

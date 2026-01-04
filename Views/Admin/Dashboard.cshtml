@@ -143,6 +143,20 @@
 </style>
 
 <div class="admin-dashboard">
+    <!-- Success/Error Messages -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div style="background: #d4edda; color: #155724; padding: 15px 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #28a745;">
+            ✅ @TempData["SuccessMessage"]
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div style="background: #f8d7da; color: #721c24; padding: 15px 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #dc3545;">
+            ❌ @TempData["ErrorMessage"]
+        </div>
+    }
+
     <!-- Quick Actions -->
     <div class="quick-actions">
         <a asp-controller="Admin" asp-action="ManageUsers" class="action-card">
@@ -169,11 +183,6 @@
             <div class="action-icon">📈</div>
             <div class="action-title">Market Rates</div>
             <div class="action-subtitle">منڈی ریٹ</div>
-        </a>
-        <a href="#" onclick="event.preventDefault(); document.getElementById('logoutForm').submit();" class="action-card">
-            <div class="action-icon">🚪</div>
-            <div class="action-title">Logout</div>
-            <div class="action-subtitle">لاگ آؤٹ</div>
         </a>
     </div>
 
@@ -209,3 +218,39 @@
         @Html.AntiForgeryToken()
     </form>
 </div>
+
+<script>
+    // Logout confirmation function
+    function confirmLogout() {
+        Swal.fire({
+            title: 'Are you sure?',
+            html: '<p style="margin: 10px 0;">کیا آپ لاگ آؤٹ کرنا چاہتے ہیں؟</p>',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc2626',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Yes, Logout / ہاں',
+            cancelButtonText: 'Cancel / منسوخ',
+            customClass: {
+                popup: 'swal-wide'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Show loading
+                Swal.fire({
+                    title: 'Logging out...',
+                    html: '<p style="margin: 10px 0;">لاگ آؤٹ ہو رہا ہے...</p>',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    showConfirmButton: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                
+                // Submit logout form
+                document.getElementById('logoutForm').submit();
+            }
+        });
+    }
+</script>

@@ -17,7 +17,6 @@ namespace HarvestHub.WebApp.Services
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            // On startup run once immediately (optional)
             await RunUpdateOnceAsync(stoppingToken);
 
             while (!stoppingToken.IsCancellationRequested)

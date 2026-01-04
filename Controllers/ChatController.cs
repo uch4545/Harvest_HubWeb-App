@@ -97,6 +97,62 @@ namespace HarvestHub.WebApp.Controllers
             }
         }
 
+        // GET: /Chat/StartConversation?receiverId=xyz
+        [HttpGet]
+        public async Task<IActionResult> StartConversation(string receiverId)
+        {
+            try
+            {
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null) return Unauthorized();
+
+                if (string.IsNullOrEmpty(receiverId))
+                {
+                    TempData["ErrorMessage"] = "Invalid receiver.";
+                    return RedirectToAction("MyConversations");
+                }
+
+                // Find existing conversation between these two users (regardless of who started it)
+                var existingConversation = await _context.Conversations
+                    .FirstOrDefaultAsync(c => 
+                        (c.BuyerId == user.Id && c.FarmerId == receiverId) ||
+                        (c.FarmerId == user.Id && c.BuyerId == receiverId));
+
+                if (existingConversation != null)
+                {
+                    return RedirectToAction("Conversation", new { id = existingConversation.Id });
+                }
+
+                // Create new conversation - determine roles
+                var receiver = await _userManager.FindByIdAsync(receiverId);
+                if (receiver == null)
+                {
+                    TempData["ErrorMessage"] = "User not found.";
+                    return RedirectToAction("MyConversations");
+                }
+
+                var conversation = new Conversation
+                {
+                    BuyerId = user.RoleType == "Buyer" ? user.Id : receiverId,
+                    FarmerId = user.RoleType == "Farmer" ? user.Id : receiverId,
+                    CropId = null, // General conversation, not tied to specific crop
+                    CreatedAt = DateTime.UtcNow,
+                    LastMessageAt = DateTime.UtcNow
+                };
+
+                _context.Conversations.Add(conversation);
+                await _context.SaveChangesAsync();
+
+                return RedirectToAction("Conversation", new { id = conversation.Id });
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Error starting conversation.";
+                LogError("StartConversation[GET]", ex);
+                return RedirectToAction("MyConversations");
+            }
+        }
+
         // POST: /Chat/StartConversation
         [HttpPost]
         public async Task<IActionResult> StartConversation(string farmerId, int? cropId)
@@ -251,7 +307,7 @@ namespace HarvestHub.WebApp.Controllers
             }
         }
 
-        // GET: /Chat/GetUnreadCount (AJAX)
+        // GET: /Chat/GetUnreadCount 
         [HttpGet]
         public async Task<IActionResult> GetUnreadCount()
         {

@@ -35,12 +35,10 @@ namespace HarvestHub.Controllers
 
         #region ---------------- Login Redirect Handler ----------------
 
-        // Catch-all for /Account/Login - redirect to welcome page
         [HttpGet]
         [AllowAnonymous]
         public IActionResult Login(string returnUrl = null)
         {
-            // Redirect to Home/Index (welcome page) instead of showing 404
             return RedirectToAction("Index", "Home");
         }
 
@@ -272,7 +270,7 @@ namespace HarvestHub.Controllers
             if (originalOtp == null || email == null)
             {
                 ModelState.AddModelError("", "OTP expired. Please register again.");
-                return View(new VerifyOtpViewModel()); // 🔹 Farmer case me bhi ek generic Register action bana sakte ho
+                return View(new VerifyOtpViewModel());
             }
 
             if (model.OtpCode == originalOtp)
@@ -398,7 +396,6 @@ namespace HarvestHub.Controllers
         {
             await _signInManager.SignOutAsync();
             
-            // Redirect to welcome page instead of specific login
             return RedirectToAction("Index", "Home");
         }
 

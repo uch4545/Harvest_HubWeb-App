@@ -64,7 +64,14 @@ namespace HarvestHub.Controllers
             {
                 if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
                 {
-                    ModelState.AddModelError("", "Email and Password are required.");
+                    TempData["Error"] = "❌ Email and Password are required. / ای میل اور پاس ورڈ درکار ہیں۔";
+                    return View("Login");
+                }
+
+                var user = await _userManager.FindByEmailAsync(email);
+                if (user == null)
+                {
+                    TempData["Error"] = "❌ Invalid email or password. Please check your credentials. / غلط ای میل یا پاس ورڈ۔ براہ کرم اپنی تفصیلات چیک کریں۔";
                     return View("Login");
                 }
 
@@ -72,7 +79,7 @@ namespace HarvestHub.Controllers
 
                 if (!result.Succeeded)
                 {
-                    ModelState.AddModelError("", "Invalid email or password.");
+                    TempData["Error"] = "❌ Invalid email or password. Please check your credentials. / غلط ای میل یا پاس ورڈ۔ براہ کرم اپنی تفصیلات چیک کریں۔";
                     return View("Login");
                 }
 
@@ -80,7 +87,7 @@ namespace HarvestHub.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = "An error occurred during login. Please try again.";
+                TempData["Error"] = "❌ An error occurred during login. Please try again. / لاگ ان کے دوران ایک خرابی پیش آئی۔ دوبارہ کوشش کریں۔";
                 LogError("LoginPost", ex);
                 return View("Login");
             }
@@ -188,6 +195,8 @@ namespace HarvestHub.Controllers
                     Crops = crops,
                     RecentOrders = myOrders
                 };
+                
+                ViewBag.ProfileImagePath = buyer.ProfileImagePath; // For sidebar and dashboard
 
                 return View(model);
             }
@@ -208,6 +217,8 @@ namespace HarvestHub.Controllers
                 var crop = await _context.Crops
                                  .Include(c => c.Images)
                                  .Include(c => c.Farmer)
+                                 .Include(c => c.Report)
+                                     .ThenInclude(r => r.Laboratory)
                                  .FirstOrDefaultAsync(c => c.Id == id);
                 if (crop == null)
                     return NotFound();
@@ -327,6 +338,116 @@ namespace HarvestHub.Controllers
                 TempData["ErrorMessage"] = "An error occurred while loading your orders. Please try again.";
                 LogError("MyOrders", ex);
                 return RedirectToAction("Dashboard");
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CancelOrder(int orderId)
+        {
+            try
+            {
+                var user = await _userManager.GetUserAsync(User);
+                var buyer = await _context.Buyers.FirstOrDefaultAsync(b => b.ApplicationUserId == user.Id);
+
+                if (buyer == null)
+                    return RedirectToAction("Register");
+
+                var order = await _context.Orders
+                    .Include(o => o.Crop)
+                        .ThenInclude(c => c.Farmer)
+                    .FirstOrDefaultAsync(o => o.Id == orderId && o.BuyerId == buyer.Id);
+
+                if (order == null)
+                {
+                    TempData["ErrorMessage"] = "Order not found.";
+                    return RedirectToAction("MyOrders");
+                }
+
+                // Check if order can be cancelled
+                if (order.Status != "Pending" && order.Status != "Accepted")
+                {
+                    TempData["ErrorMessage"] = "This order cannot be cancelled.";
+                    return RedirectToAction("MyOrders");
+                }
+
+                // Update order status to Cancelled
+                order.Status = "Cancelled";
+                await _context.SaveChangesAsync();
+
+                // Send notification to farmer
+                var notification = new Notification
+                {
+                    FarmerId = order.Crop.FarmerId,
+                    OrderId = order.Id,
+                    NotificationType = "OrderCancelled",
+                    BuyerName = buyer.FullName,
+                    CropName = order.Crop.Name,
+                    Quantity = order.Quantity,
+                    TotalPrice = order.TotalPrice,
+                    IsRead = false,
+                    CreatedAt = DateTime.UtcNow,
+                    Message = $"Buyer {buyer.FullName} cancelled the order for {order.Quantity} kg of {order.Crop.Name}. / خریدار نے آرڈر منسوخ کر دیا۔"
+                };
+
+                _context.Notifications.Add(notification);
+                await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = "Order cancelled successfully!";
+                return RedirectToAction("MyOrders");
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "An error occurred while cancelling the order. Please try again.";
+                LogError("CancelOrder", ex);
+                return RedirectToAction("MyOrders");
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteOrder(int orderId)
+        {
+            try
+            {
+                var user = await _userManager.GetUserAsync(User);
+                var buyer = await _context.Buyers.FirstOrDefaultAsync(b => b.ApplicationUserId == user.Id);
+
+                if (buyer == null)
+                    return RedirectToAction("Register");
+
+                var order = await _context.Orders
+                    .FirstOrDefaultAsync(o => o.Id == orderId && o.BuyerId == buyer.Id);
+
+                if (order == null)
+                {
+                    TempData["ErrorMessage"] = "Order not found.";
+                    return RedirectToAction("MyOrders");
+                }
+
+                // Delete associated notifications FIRST (due to foreign key constraint)
+                var notifications = await _context.Notifications
+                    .Where(n => n.OrderId == orderId)
+                    .ToListAsync();
+
+                if (notifications.Any())
+                {
+                    _context.Notifications.RemoveRange(notifications);
+                    await _context.SaveChangesAsync(); // Save notification deletions first
+                }
+
+                // Now delete the order
+                _context.Orders.Remove(order);
+                await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = "Order removed successfully!";
+                return RedirectToAction("MyOrders");
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"An error occurred while deleting the order: {ex.Message}";
+                LogError("DeleteOrder", ex);
+                return RedirectToAction("MyOrders");
             }
         }
 

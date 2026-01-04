@@ -194,9 +194,9 @@
 <div class="reports-container">
     <div class="page-header">
         <h2>🔬 My Lab Reports</h2>
-        <a asp-action="UploadReport" class="upload-btn">
-            <span>📤</span>
-            <span>Upload New Report</span>
+        <a asp-action="AddCrop" class="upload-btn">
+            <span>➕</span>
+            <span>Add Crop with Report</span>
         </a>
     </div>
 
@@ -249,10 +249,11 @@
         <div class="empty-state">
             <div class="empty-state-icon">🔬</div>
             <h3>No Lab Reports Yet</h3>
-            <p>Upload lab reports to verify your crop quality and build buyer trust!</p>
-            <a asp-action="UploadReport" class="upload-btn">
-                <span>📤</span>
-                <span>Upload Your First Report</span>
+            <p>Add crops with lab reports to verify your crop quality and build buyer trust!</p>
+            <p style="color: #666; font-size: 0.9rem; margin-top: 10px;">💡 Tip: Upload lab reports when adding or editing crops</p>
+            <a asp-action="AddCrop" class="upload-btn">
+                <span>➕</span>
+                <span>Add Your First Crop</span>
             </a>
         </div>
     }

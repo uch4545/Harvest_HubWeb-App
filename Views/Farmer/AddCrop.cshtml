@@ -225,25 +225,26 @@
                 </div>
             </div>
 
-            <!-- Lab Report (Optional) -->
+            <!-- Lab Report (Required) -->
             <div class="form-section">
                 <div class="section-title">
                     <span>🔬</span>
-                    <span>Lab Report (Optional)</span>
+                    <span>Lab Report *</span>
                 </div>
 
                 <div class="form-group">
-                    <label>Select Laboratory</label>
+                    <label>Select Laboratory *</label>
                     <select name="laboratoryId"
-                            asp-items="@(new SelectList(ViewBag.Labs, "Id", "LabName"))">
+                            asp-items="@(new SelectList(ViewBag.Labs, "Id", "LabName"))"
+                            required>
                         <option value="">-- Select Laboratory --</option>
                     </select>
                 </div>
 
                 <div class="form-group file-input-wrapper">
-                    <label>Upload Lab Report</label>
-                    <input type="file" name="reportFile" accept=".pdf,.jpg,.jpeg,.png" />
-                    <p class="helper-text">💡 Lab reports increase buyer trust and can help you get better prices</p>
+                    <label>Upload Lab Report *</label>
+                    <input type="file" name="reportFile" accept=".pdf,.jpg,.jpeg,.png" required />
+                    <p class="helper-text">💡 Lab reports are required and help build buyer trust</p>
                 </div>
             </div>
 

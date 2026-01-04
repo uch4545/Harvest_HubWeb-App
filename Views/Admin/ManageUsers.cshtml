@@ -5,54 +5,284 @@
     var buyers = ViewBag.Buyers as List<HarvestHub.WebApp.Models.Buyer>;
 }
 
-<h1 class="text-2xl font-bold mb-6">Manage Users</h1>
+<style>
+    .admin-page {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    /* Page Header */
+    .page-header {
+        background: linear-gradient(135deg, #075e54, #128c7e);
+        color: white;
+        border-radius: 20px;
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px rgba(7, 94, 84, 0.3);
+    }
+    
+    .page-header h1 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    /* Section Cards */
+    .user-section {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        margin-bottom: 25px;
+    }
+    
+    .section-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #e8f5e9;
+    }
+    
+    .user-count {
+        background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+        color: #075e54;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        margin-left: auto;
+    }
+    
+    /* Modern Table */
+    .users-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+    
+    .users-table thead {
+        background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+    }
+    
+    .users-table th {
+        padding: 15px;
+        text-align: left;
+        font-weight: 600;
+        color: #075e54;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .users-table th:first-child {
+        border-radius: 10px 0 0 0;
+    }
+    
+    .users-table th:last-child {
+        border-radius: 0 10px 0 0;
+    }
+    
+    .users-table tbody tr {
+        transition: all 0.3s ease;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .users-table tbody tr:hover {
+        background: #f8fffe;
+        transform: translateY(-2px);
+        box-shadow: 0 2px 8px rgba(7, 94, 84, 0.1);
+    }
+    
+    .users-table td {
+        padding: 15px;
+        color: #333;
+    }
+    
+    .user-name {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #075e54, #128c7e);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 0.9rem;
+    }
+    
+    .user-details {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .user-fullname {
+        font-weight: 600;
+        color: #1a1a1a;
+    }
+    
+    .user-role {
+        font-size: 0.8rem;
+        color: #666;
+    }
+    
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #666;
+    }
+    
+    .empty-icon {
+        font-size: 4rem;
+        margin-bottom: 15px;
+        opacity: 0.5;
+    }
+    
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .admin-page {
+            padding: 10px;
+        }
+        
+        .page-header {
+            padding: 20px;
+        }
+        
+        .page-header h1 {
+            font-size: 1.4rem;
+        }
+        
+        .user-section {
+            padding: 15px;
+            overflow-x: auto;
+        }
+        
+        .users-table {
+            min-width: 600px;
+        }
+    }
+</style>
 
-<div class="grid grid-cols-2 gap-6">
-    <!-- Farmers -->
-    <div class="bg-white shadow rounded-lg p-6">
-        <h2 class="text-xl font-semibold mb-4">Farmers</h2>
-        <table class="table-auto w-full border border-gray-300 text-sm">
-            <thead class="bg-gray-100">
-                <tr>
-                    <th class="px-3 py-2">Name</th>
-                    <th class="px-3 py-2">Email</th>
-                    <th class="px-3 py-2">Phone</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var f in farmers)
-                {
-                    <tr class="border-b">
-                        <td class="px-3 py-2">@f.FullName</td>
-                        <td class="px-3 py-2">@f.Email</td>
-                        <td class="px-3 py-2">@f.PhoneNumber</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+<div class="admin-page">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1>👥 Manage Users / یوزرز کو منظم کریں</h1>
     </div>
 
-    <!-- Buyers -->
-    <div class="bg-white shadow rounded-lg p-6">
-        <h2 class="text-xl font-semibold mb-4">Buyers</h2>
-        <table class="table-auto w-full border border-gray-300 text-sm">
-            <thead class="bg-gray-100">
-                <tr>
-                    <th class="px-3 py-2">Name</th>
-                    <th class="px-3 py-2">Email</th>
-                    <th class="px-3 py-2">Phone</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var b in buyers)
-                {
-                    <tr class="border-b">
-                        <td class="px-3 py-2">@b.FullName</td>
-                        <td class="px-3 py-2">@b.Email</td>
-                        <td class="px-3 py-2">@b.PhoneNumber</td>
+    <!-- Farmers Section -->
+    <div class="user-section">
+        <div class="section-title">
+            🌾 Farmers / کسان
+            <span class="user-count">@farmers.Count() Total</span>
+        </div>
+        
+        @if (farmers != null && farmers.Any())
+        {
+            <table class="users-table">
+                <thead>
+                    <tr>
+                        <th>Name / نام</th>
+                        <th>Email / ای میل</th>
+                        <th>Phone / فون</th>
+                        <th>CNIC</th>
                     </tr>
-                }
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @foreach (var f in farmers)
+                    {
+                        <tr>
+                            <td>
+                                <div class="user-name">
+                                    <div class="user-avatar">
+                                        @(f.FullName?.Substring(0, 1).ToUpper() ?? "F")
+                                    </div>
+                                    <div class="user-details">
+                                        <span class="user-fullname">@f.FullName</span>
+                                        <span class="user-role">Farmer</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>@f.Email</td>
+                            <td>@f.PhoneNumber</td>
+                            <td>@f.CNIC</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="empty-state">
+                <div class="empty-icon">🌾</div>
+                <h3>No Farmers Found</h3>
+                <p>کوئی کسان نہیں ملا</p>
+            </div>
+        }
+    </div>
+
+    <!-- Buyers Section -->
+    <div class="user-section">
+        <div class="section-title">
+            🛒 Buyers / خریدار
+            <span class="user-count">@buyers.Count() Total</span>
+        </div>
+        
+        @if (buyers != null && buyers.Any())
+        {
+            <table class="users-table">
+                <thead>
+                    <tr>
+                        <th>Name / نام</th>
+                        <th>Email / ای میل</th>
+                        <th>Phone / فون</th>
+                        <th>CNIC</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var b in buyers)
+                    {
+                        <tr>
+                            <td>
+                                <div class="user-name">
+                                    <div class="user-avatar">
+                                        @(b.FullName?.Substring(0, 1).ToUpper() ?? "B")
+                                    </div>
+                                    <div class="user-details">
+                                        <span class="user-fullname">@b.FullName</span>
+                                        <span class="user-role">Buyer</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>@b.Email</td>
+                            <td>@b.PhoneNumber</td>
+                            <td>@b.CNIC</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="empty-state">
+                <div class="empty-icon">🛒</div>
+                <h3>No Buyers Found</h3>
+                <p>کوئی خریدار نہیں ملا</p>
+            </div>
+        }
     </div>
 </div>

@@ -75,8 +75,8 @@ var localizationOptions = new RequestLocalizationOptions
     SupportedUICultures = supportedCultures.Select(c => new System.Globalization.CultureInfo(c)).ToList()
 };
 localizationOptions.RequestCultureProviders.Insert(0, new Microsoft.AspNetCore.Localization.CookieRequestCultureProvider());
-app.UseRequestLocalization(localizationOptions);
-// app.UseHttpsRedirection(); // Temporarily disabled for mobile testing
+//app.UseRequestLocalization(localizationOptions);
+app.UseHttpsRedirection(); // Temporarily disabled for mobile testing
 app.UseStaticFiles();
 app.UseCors();
 

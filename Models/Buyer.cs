@@ -18,6 +18,8 @@ namespace HarvestHub.WebApp.Models
         public string CNIC { get; set; }
 
         public string PhoneNumber { get; set; }
+        
+        public string? ProfileImagePath { get; set; }
 
         public string PasswordHash { get; set; }
 

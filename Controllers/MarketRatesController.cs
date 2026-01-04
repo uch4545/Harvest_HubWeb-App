@@ -43,6 +43,28 @@ namespace HarvestHub.WebApp.Controllers
         {
             try
             {
+                // Check if rates were already updated today (Pakistan time)
+                var pakistanTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Pakistan Standard Time");
+                var nowPakistan = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, pakistanTimeZone);
+                var todayStartPakistan = nowPakistan.Date; // Midnight of today
+                
+                var latestRate = await _context.MarketRates
+                    .OrderByDescending(r => r.LastUpdated)
+                    .FirstOrDefaultAsync();
+                
+                if (latestRate != null)
+                {
+                    var lastUpdatePakistan = TimeZoneInfo.ConvertTimeFromUtc(latestRate.LastUpdated, pakistanTimeZone);
+                    
+                    // If the last update was today (same date), don't update again
+                    if (lastUpdatePakistan.Date == todayStartPakistan)
+                    {
+                        var nextUpdateTime = todayStartPakistan.AddDays(1).ToString("dd MMM yyyy, 12:00 AM");
+                        TempData["Info"] = $"⏰ Rates are already up-to-date for today. Next update available after midnight: {nextUpdateTime}";
+                        return RedirectToAction("Index");
+                    }
+                }
+                
                 var latestRates = await _service.FetchLatestRatesAsync();
 
                 if (!latestRates.Any())
@@ -63,7 +85,7 @@ namespace HarvestHub.WebApp.Controllers
                         CropNameUrdu = dto.CropNameUrdu,
                         CurrentRate = dto.CurrentRate,
                         Unit = dto.Unit,
-                        LastUpdated = dto.LastUpdated
+                        LastUpdated = DateTime.UtcNow
                     });
                 }
 

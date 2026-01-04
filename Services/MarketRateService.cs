@@ -17,10 +17,6 @@ namespace HarvestHub.WebApp.Services
             _http.Timeout = TimeSpan.FromSeconds(30);
         }
 
-        /// <summary>
-        /// Fetches Pakistan crop rates - uses realistic data for common Pakistani crops
-        /// In production, this would connect to AMIS or Mandi Board APIs
-        /// </summary>
         public async Task<List<MarketRateDto>> FetchLatestRatesAsync()
         {
             try
@@ -37,10 +33,6 @@ namespace HarvestHub.WebApp.Services
             }
         }
 
-        /// <summary>
-        /// Gets realistic current market rates for major Pakistani crops
-        /// Prices are based on typical mandi rates (per 40 kg maund or per kg where specified)
-        /// </summary>
         private List<MarketRateDto> GetPakistanCropRates()
         {
             var random = new Random();
@@ -106,7 +98,7 @@ namespace HarvestHub.WebApp.Services
                     CropNameUrdu = crop.NameUrdu,
                     CurrentRate = randomPrice,
                     Unit = crop.Unit,
-                    LastUpdated = now.AddMinutes(-random.Next(0, 120)) // Random time in last 2 hours
+                    LastUpdated = now.AddMinutes(-random.Next(0, 120)) 
                 });
             }
 

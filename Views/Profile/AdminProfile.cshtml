@@ -1,0 +1,109 @@
+@model HarvestHub.WebApp.Models.ApplicationUser
+@{
+    ViewData["Title"] = "Admin Profile";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .profile-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .profile-card {
+        background: white;
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    }
+    
+    .profile-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+    
+    .profile-avatar {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #075e54, #128c7e);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 3rem;
+        font-weight: bold;
+        margin: 0 auto 20px;
+        border: 5px solid #e8f5e9;
+    }
+    
+    .profile-name {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #075e54;
+        margin-bottom: 5px;
+    }
+    
+    .profile-role {
+        color: #666;
+        font-size: 1.1rem;
+    }
+    
+    .profile-info {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 25px;
+        margin-top: 30px;
+    }
+    
+    .info-item {
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 12px;
+        border-left: 4px solid #128c7e;
+    }
+    
+    .info-label {
+        font-size: 0.85rem;
+        color: #666;
+        margin-bottom: 5px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    
+    .info-value {
+        font-size: 1.1rem;
+        color: #1a1a1a;
+        font-weight: 500;
+    }
+</style>
+
+<div class="profile-container">
+    <div class="profile-card">
+        <div class="profile-header">
+            <div class="profile-avatar">
+                @(Model.FullName?.Substring(0, 1).ToUpper() ?? "A")
+            </div>
+            <h1 class="profile-name">@Model.FullName</h1>
+            <p class="profile-role">🛡️ Administrator / منتظم</p>
+        </div>
+        
+        <div class="profile-info">
+            <div class="info-item">
+                <div class="info-label">📧 Email</div>
+                <div class="info-value">@Model.Email</div>
+            </div>
+            
+            <div class="info-item">
+                <div class="info-label">🆔 Username</div>
+                <div class="info-value">@Model.UserName</div>
+            </div>
+            
+            <div class="info-item">
+                <div class="info-label">👤 Role</div>
+                <div class="info-value">Administrator</div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -14,25 +14,26 @@ namespace HarvestHub.WebApp.Models
         [ForeignKey("FarmerId")]
         public Farmer Farmer { get; set; }
 
-        [Required]
-        public int OrderId { get; set; }
+        // Nullable for non-order notifications (e.g., crop deletion)
+        public int? OrderId { get; set; }
         
         [ForeignKey("OrderId")]
         public Order Order { get; set; }
 
+        // Type of notification: "Order", "CropDeleted", etc.
         [Required]
+        [StringLength(50)]
+        public string NotificationType { get; set; } = "Order";
+
         [StringLength(200)]
         public string BuyerName { get; set; }
 
-        [Required]
         [StringLength(200)]
         public string CropName { get; set; }
 
-        [Required]
-        public decimal Quantity { get; set; }
+        public decimal? Quantity { get; set; }
 
-        [Required]
-        public decimal TotalPrice { get; set; }
+        public decimal? TotalPrice { get; set; }
 
         public bool IsRead { get; set; } = false;
 

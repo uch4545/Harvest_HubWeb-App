@@ -218,6 +218,11 @@
         color: #721c24;
     }
     
+    .status-cancelled {
+        background: #ffeaa7;
+        color: #6c5ce7;
+    }
+    
     .empty-state {
         text-align: center;
         padding: 60px 20px;
@@ -302,7 +307,7 @@
                     
                     <div class="notification-body">
                         <div class="crop-image-small">
-                            @if (notification.Order.Crop.Images != null && notification.Order.Crop.Images.Any())
+                            @if (notification.Order?.Crop?.Images != null && notification.Order.Crop.Images.Any())
                             {
                                 <img src="@notification.Order.Crop.Images.First().ImageUrl" alt="@notification.CropName" />
                             }
@@ -321,21 +326,30 @@
                             </p>
                             
                             <div class="notification-info">
-                                <div class="info-item">
-                                    <span>👤</span>
-                                    <span>Buyer: <strong>@notification.BuyerName</strong></span>
-                                </div>
-                                <div class="info-item">
-                                    <span>⚖️</span>
-                                    <span>Quantity: <strong>@notification.Quantity kg</strong></span>
-                                </div>
-                                <div class="info-item">
-                                    <span>💰</span>
-                                    <span>Total: <strong>Rs. @notification.TotalPrice.ToString("N0")</strong></span>
-                                </div>
+                                @if (!string.IsNullOrEmpty(notification.BuyerName))
+                                {
+                                    <div class="info-item">
+                                        <span>👤</span>
+                                        <span>Buyer: <strong>@notification.BuyerName</strong></span>
+                                    </div>
+                                }
+                                @if (notification.Quantity.HasValue)
+                                {
+                                    <div class="info-item">
+                                        <span>⚖️</span>
+                                        <span>Quantity: <strong>@notification.Quantity.Value kg</strong></span>
+                                    </div>
+                                }
+                                @if (notification.TotalPrice.HasValue)
+                                {
+                                    <div class="info-item">
+                                        <span>💰</span>
+                                        <span>Total: <strong>Rs. @notification.TotalPrice.Value.ToString("N0")</strong></span>
+                                    </div>
+                                }
                             </div>
                             
-                            @if (notification.Order.Status != "Pending")
+                            @if (notification.Order != null && notification.Order.Status != "Pending")
                             {
                                 <div class="status-label status-@notification.Order.Status.ToLower()">
                                     @if (notification.Order.Status == "Accepted")
@@ -346,6 +360,10 @@
                                     {
                                         <text>❌ Rejected</text>
                                     }
+                                    else if (notification.Order.Status == "Cancelled")
+                                    {
+                                        <text>🚫 Cancelled</text>
+                                    }
                                     else
                                     {
                                         @notification.Order.Status
@@ -354,41 +372,59 @@
                             }
                         </div>
                         
-                        @if (notification.Order.Status == "Pending")
+                        @if (notification.NotificationType == "Order" && notification.Order != null)
                         {
-                            <div class="action-buttons">
-                                <form asp-action="ConfirmOrder" asp-controller="Farmer" method="post" style="margin: 0;">
+                            @if (notification.Order.Status == "Pending")
+                            {
+                                <div class="action-buttons">
+                                    <form asp-action="ConfirmOrder" asp-controller="Farmer" method="post" style="margin: 0;">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="orderId" value="@notification.OrderId" />
+                                        <input type="hidden" name="notificationId" value="@notification.Id" />
+                                        <button type="submit" class="btn-action btn-confirm">
+                                            ✅ Confirm
+                                        </button>
+                                    </form>
+                                    
+                                    <form asp-action="RejectOrder" asp-controller="Farmer" method="post" style="margin: 0;">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="orderId" value="@notification.OrderId" />
+                                        <input type="hidden" name="notificationId" value="@notification.Id" />
+                                        <button type="submit" class="btn-action btn-reject">
+                                            ❌ Reject
+                                        </button>
+                                    </form>
+                                    
+                                    <a href="@Url.Action("StartConversation", "Chat", new { receiverId = notification.Order.Buyer.ApplicationUserId })" 
+                                       class="btn-action btn-chat">
+                                        💬 Chat
+                                    </a>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="action-buttons">
+                                @if (notification.Order.Status == "Accepted")
+                                {
+                                    <form asp-action="CancelOrderByFarmer" method="post" class="cancel-form" data-cropname="@notification.CropName" style="margin: 0;">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="orderId" value="@notification.OrderId" />
+                                        <input type="hidden" name="notificationId" value="@notification.Id" />
+                                        <button type="submit" class="btn-action btn-reject">🚫 Cancel Order</button>
+                                    </form>
+                                }
+                                <form asp-action="DeleteNotificationOrder" method="post" class="delete-form" data-cropname="@notification.CropName" style="margin: 0;">
                                     @Html.AntiForgeryToken()
-                                    <input type="hidden" name="orderId" value="@notification.OrderId" />
                                     <input type="hidden" name="notificationId" value="@notification.Id" />
-                                    <button type="submit" class="btn-action btn-confirm">
-                                        ✅ Confirm
-                                    </button>
-                                </form>
-                                
-                                <form asp-action="RejectOrder" asp-controller="Farmer" method="post" style="margin: 0;">
-                                    @Html.AntiForgeryToken()
                                     <input type="hidden" name="orderId" value="@notification.OrderId" />
-                                    <input type="hidden" name="notificationId" value="@notification.Id" />
-                                    <button type="submit" class="btn-action btn-reject">
-                                        ❌ Reject
-                                    </button>
+                                    <button type="submit" class="btn-action btn-delete" style="background: linear-gradient(135deg, #6c757d, #5a6268); color: white;">🗑️ Remove</button>
                                 </form>
-                                
-                                <a href="@Url.Action("StartConversation", "Chat", new { receiverId = notification.Order.Buyer.ApplicationUserId })" 
-                                   class="btn-action btn-chat">
-                                    💬 Chat
-                                </a>
-                            </div>
-                        }
-                        else
-                        {
-                            <div class="action-buttons">
                                 <a href="@Url.Action("StartConversation", "Chat", new { receiverId = notification.Order.Buyer.ApplicationUserId })" 
                                    class="btn-action btn-chat">
                                     💬 Chat with Buyer
                                 </a>
                             </div>
+                        }
                         }
                     </div>
                 </div>
@@ -405,3 +441,55 @@
         </div>
     }
 </div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Cancel Order Confirmation
+            document.querySelectorAll(".cancel-form").forEach(form => {
+                form.addEventListener("submit", function (e) {
+                    e.preventDefault();
+                    const cropName = form.getAttribute("data-cropname");
+
+                    Swal.fire({
+                        title: "Cancel Order?",
+                        html: `<p>Are you sure you want to cancel this order for "${cropName}"?</p><p style="color: #666; font-size: 0.9rem;">آرڈر منسوخ کریں؟</p>`,
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: "#dc3545",
+                        cancelButtonColor: "#128c7e",
+                        confirmButtonText: "Yes, Cancel It",
+                        cancelButtonText: "No, Keep It"
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
+                });
+            });
+
+            // Delete Notification/Order Confirmation
+            document.querySelectorAll(".delete-form").forEach(form => {
+                form.addEventListener("submit", function (e) {
+                    e.preventDefault();
+
+                    Swal.fire({
+                        title: "Delete Notification?",
+                        html: `<p>Are you sure you want to remove this notification/order?</p><p style="color: #666; font-size: 0.9rem;">اطلاع حذف کریں؟</p>`,
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: "#6c757d",
+                        cancelButtonColor: "#128c7e",
+                        confirmButtonText: "Yes, Delete It",
+                        cancelButtonText: "Cancel"
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+}

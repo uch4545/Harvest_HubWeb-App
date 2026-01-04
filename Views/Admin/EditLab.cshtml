@@ -4,45 +4,248 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1 class="text-2xl font-bold mb-4">Edit Laboratory</h1>
+<style>
+    .admin-page {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    /* Page Header */
+    .page-header {
+        background: linear-gradient(135deg, #075e54, #128c7e);
+        color: white;
+        border-radius: 20px;
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px rgba(7, 94, 84, 0.3);
+    }
+    
+    .page-header h1 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    /* Form Card */
+    .form-card {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    /* Form Group */
+    .form-group {
+        margin-bottom: 25px;
+    }
+    
+    .form-label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #1a1a1a;
+        font-size: 0.95rem;
+    }
+    
+    .form-label-urdu {
+        color: #666;
+        font-size: 0.85rem;
+        margin-left: 8px;
+    }
+    
+    .form-input {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        box-sizing: border-box;
+    }
+    
+    .form-input:focus {
+        outline: none;
+        border-color: #128c7e;
+        box-shadow: 0 0 0 3px rgba(18, 140, 126, 0.1);
+    }
+    
+    .validation-error {
+        color: #f44336;
+        font-size: 0.85rem;
+        margin-top: 5px;
+        display: block;
+    }
+    
+    /* Form Sections */
+    .form-section {
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+    
+    .form-section:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+    }
+    
+    .section-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #075e54;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    /* Action Buttons */
+    .form-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 30px;
+    }
+    
+    .btn {
+        padding: 12px 24px;
+        border-radius: 10px;
+        font-size: 1rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .btn-submit {
+        background: linear-gradient(135deg, #075e54, #128c7e);
+        color: white;
+        flex: 1;
+    }
+    
+    .btn-submit:hover {
+        background: linear-gradient(135deg, #064e46, #0f7269);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(7, 94, 84, 0.3);
+    }
+    
+    .btn-cancel {
+        background: #f5f5f5;
+        color: #666;
+        padding: 12px 24px;
+    }
+    
+    .btn-cancel:hover {
+        background: #e0e0e0;
+        color: #333;
+    }
+    
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .admin-page {
+            padding: 10px;
+        }
+        
+        .page-header {
+            padding: 20px;
+        }
+        
+        .page-header h1 {
+            font-size: 1.4rem;
+        }
+        
+        .form-card {
+            padding: 20px;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+        }
+    }
+</style>
 
-<form asp-action="EditLab" method="post" class="space-y-4">
-    <input type="hidden" asp-for="Id" />
-
-    <div>
-        <label>Lab Name</label>
-        <input asp-for="LabName" class="w-full border px-3 py-2 rounded" />
-        <span asp-validation-for="LabName" class="text-red-500"></span>
+<div class="admin-page">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1>✏️ Edit Laboratory / لیب میں ترمیم کریں</h1>
     </div>
 
-    <div>
-        <label>License Number</label>
-        <input asp-for="LicenseNumber" class="w-full border px-3 py-2 rounded" />
-        <span asp-validation-for="LicenseNumber" class="text-red-500"></span>
-    </div>
+    <!-- Form Card -->
+    <div class="form-card">
+        <form asp-action="EditLab" method="post">
+            <input type="hidden" asp-for="Id" />
 
-    <div>
-        <label>Contact Person</label>
-        <input asp-for="ContactPerson" class="w-full border px-3 py-2 rounded" />
-    </div>
+            <!-- Basic Information -->
+            <div class="form-section">
+                <div class="section-title">📋 Basic Information</div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        Lab Name
+                        <span class="form-label-urdu">لیب کا نام</span>
+                    </label>
+                    <input asp-for="LabName" class="form-input" placeholder="Enter laboratory name" />
+                    <span asp-validation-for="LabName" class="validation-error"></span>
+                </div>
 
-    <div>
-        <label>Phone</label>
-        <input asp-for="Phone" class="w-full border px-3 py-2 rounded" />
-    </div>
+                <div class="form-group">
+                    <label class="form-label">
+                        License Number
+                        <span class="form-label-urdu">لائسنس نمبر</span>
+                    </label>
+                    <input asp-for="LicenseNumber" class="form-input" placeholder="Enter license number" />
+                    <span asp-validation-for="LicenseNumber" class="validation-error"></span>
+                </div>
+            </div>
 
-    <div>
-        <label>Email</label>
-        <input asp-for="Email" class="w-full border px-3 py-2 rounded" />
-    </div>
+            <!-- Contact Information -->
+            <div class="form-section">
+                <div class="section-title">📞 Contact Information</div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        Contact Person
+                        <span class="form-label-urdu">رابطہ شخص</span>
+                    </label>
+                    <input asp-for="ContactPerson" class="form-input" placeholder="Enter contact person name" />
+                </div>
 
-    <div>
-        <label>Website / Social</label>
-        <input asp-for="WebsiteUrl" class="w-full border px-3 py-2 rounded" />
-    </div>
+                <div class="form-group">
+                    <label class="form-label">
+                        Phone Number
+                        <span class="form-label-urdu">فون نمبر</span>
+                    </label>
+                    <input asp-for="Phone" class="form-input" placeholder="Enter phone number" />
+                </div>
 
-    <div class="flex space-x-2">
-        <button type="submit" class="bg-yellow-700 hover:bg-yellow-800 text-white px-4 py-2 rounded">Update</button>
-        <a asp-action="ManageLabs" class="bg-gray-500 text-white px-4 py-2 rounded">Cancel</a>
+                <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    <input asp-for="Email" class="form-input" type="email" placeholder="Enter email address" />
+                </div>
+            </div>
+
+            <!-- Additional Information -->
+            <div class="form-section">
+                <div class="section-title">🌐 Additional Information</div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        Website / Social Media Link
+                        <span class="form-label-urdu">(اختیاری)</span>
+                    </label>
+                    <input asp-for="WebsiteUrl" class="form-input" placeholder="https://www.example.com or social media link" />
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <button type="submit" class="btn btn-submit">💾 Update Laboratory</button>
+                <a asp-action="ManageLabs" class="btn btn-cancel">Cancel</a>
+            </div>
+        </form>
     </div>
-</form>
+</div>

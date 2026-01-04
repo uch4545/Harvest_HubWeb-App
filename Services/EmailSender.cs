@@ -33,7 +33,7 @@ public class EmailSender : IEmailSender
 
         mailMessage.To.Add(email);
 
-        await client.SendMailAsync(mailMessage); // This line must complete successfully.
+        await client.SendMailAsync(mailMessage);
     }
 
 }

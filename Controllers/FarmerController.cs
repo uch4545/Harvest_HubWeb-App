@@ -509,15 +509,60 @@ namespace HarvestHub.WebApp.Controllers
                     return RedirectToAction("MyCrops");
                 }
 
-                // Check if there are any orders for this crop
-                var hasOrders = await _context.Orders.AnyAsync(o => o.CropId == id);
-                if (hasOrders)
+                // Check if there are any ACTIVE/PENDING orders for this crop (not cancelled)
+                var activeOrders = await _context.Orders
+                    .Where(o => o.CropId == id && o.Status != "Cancelled")
+                    .ToListAsync();
+                
+                if (activeOrders.Any())
                 {
-                    TempData["ErrorMessage"] = "Cannot delete this crop. There are existing orders for this crop.";
+                    var orderCount = activeOrders.Count;
+                    TempData["ErrorMessage"] = $"Cannot delete this crop. You have {orderCount} active order(s). Please cancel all orders first before deleting the crop. / آپ اس فصل کو حذف نہیں کر سکتے۔ آپ کے پاس {orderCount} فعال آرڈر ہیں۔ فصل حذف کرنے سے پہلے تمام آرڈرز منسوخ کریں۔";
                     return RedirectToAction("MyCrops");
                 }
 
-                // Delete associated images first
+                // Delete all cancelled orders for this crop
+                var cancelledOrders = await _context.Orders
+                    .Where(o => o.CropId == id && o.Status == "Cancelled")
+                    .ToListAsync();
+                
+                if (cancelledOrders.Any())
+                {
+                    var cancelledOrderIds = cancelledOrders.Select(o => o.Id).ToList();
+                    
+                    // Delete notifications related to these cancelled orders
+                    var relatedNotifications = await _context.Notifications
+                        .Where(n => n.OrderId.HasValue && cancelledOrderIds.Contains(n.OrderId.Value))
+                        .ToListAsync();
+                    
+                    if (relatedNotifications.Any())
+                    {
+                        _context.Notifications.RemoveRange(relatedNotifications);
+                    }
+                    
+                    _context.Orders.RemoveRange(cancelledOrders);
+                }
+
+                // Delete conversations related to this crop
+                var conversations = await _context.Conversations
+                    .Where(c => c.CropId == id)
+                    .Include(c => c.Messages)
+                    .ToListAsync();
+                
+                if (conversations.Any())
+                {
+                    // Delete messages first (cascade should handle this, but being explicit)
+                    foreach (var conv in conversations)
+                    {
+                        if (conv.Messages != null && conv.Messages.Any())
+                        {
+                            _context.ChatMessages.RemoveRange(conv.Messages);
+                        }
+                    }
+                    _context.Conversations.RemoveRange(conversations);
+                }
+
+                // Delete associated images
                 if (crop.Images != null && crop.Images.Any())
                 {
                     _context.CropImages.RemoveRange(crop.Images);
@@ -532,7 +577,7 @@ namespace HarvestHub.WebApp.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = "An error occurred while deleting crop. Please try again.";
+                TempData["ErrorMessage"] = $"An error occurred while deleting crop: {ex.Message}";
                 LogError("DeleteCrop", ex);
                 return RedirectToAction("MyCrops");
             }

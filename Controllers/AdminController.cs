@@ -129,16 +129,61 @@ namespace HarvestHub.Controllers
                 var farmerId = crop.FarmerId;
                 var cropName = crop.Name;
 
-                // Delete associated images
+                // ADMIN HAS FULL AUTHORITY - Delete all related records first
+                
+                // 1. Delete conversations and chat messages related to this crop
+                var conversations = await _context.Conversations
+                    .Where(c => c.CropId == id)
+                    .Include(c => c.Messages)
+                    .ToListAsync();
+                
+                if (conversations.Any())
+                {
+                    // Delete messages first
+                    foreach (var conv in conversations)
+                    {
+                        if (conv.Messages != null && conv.Messages.Any())
+                        {
+                            _context.ChatMessages.RemoveRange(conv.Messages);
+                        }
+                    }
+                    _context.Conversations.RemoveRange(conversations);
+                }
+
+                // 2. Find all orders related to this crop
+                var relatedOrders = await _context.Orders
+                    .Where(o => o.CropId == id)
+                    .ToListAsync();
+
+                if (relatedOrders.Any())
+                {
+                    var orderIds = relatedOrders.Select(o => o.Id).ToList();
+                    
+                    // 3. Delete notifications related to these orders
+                    var relatedNotifications = await _context.Notifications
+                        .Where(n => n.OrderId.HasValue && orderIds.Contains(n.OrderId.Value))
+                        .ToListAsync();
+                    
+                    if (relatedNotifications.Any())
+                    {
+                        _context.Notifications.RemoveRange(relatedNotifications);
+                    }
+
+                    // 4. Delete all orders for this crop
+                    _context.Orders.RemoveRange(relatedOrders);
+                }
+
+                // 5. Delete associated crop images
                 if (crop.Images != null && crop.Images.Any())
                 {
                     _context.CropImages.RemoveRange(crop.Images);
                 }
 
+                // 6. Delete the crop itself
                 _context.Crops.Remove(crop);
                 await _context.SaveChangesAsync();
 
-                // Send notification to farmer
+                // 7. Send notification to farmer about crop deletion
                 var notification = new Notification
                 {
                     FarmerId = farmerId,
@@ -152,12 +197,12 @@ namespace HarvestHub.Controllers
                 _context.Notifications.Add(notification);
                 await _context.SaveChangesAsync();
 
-                TempData["SuccessMessage"] = $"Crop '{cropName}' deleted successfully!";
+                TempData["SuccessMessage"] = $"Crop '{cropName}' and all related data deleted successfully!";
                 return RedirectToAction("ManageProducts");
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = "An error occurred while deleting crop. Please try again.";
+                TempData["ErrorMessage"] = $"An error occurred while deleting crop: {ex.Message}";
                 LogError("DeleteCrop", ex);
                 return RedirectToAction("ManageProducts");
             }

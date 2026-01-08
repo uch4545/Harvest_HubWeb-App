@@ -1,0 +1,211 @@
+@model List<HarvestHub.WebApp.Models.City>
+@{
+    ViewData["Title"] = "Manage Cities";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .admin-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    
+    .btn-primary {
+        background: #128c7e;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 10px;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+    }
+    
+    .btn-primary:hover {
+        background: #075e54;
+        color: white;
+    }
+    
+    table {
+        width: 100%;
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    th {
+        background: #128c7e;
+        color: white;
+        padding: 15px;
+        text-align: left;
+    }
+    
+    td {
+        padding: 12px 15px;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .btn-sm {
+        padding: 5px 15px;
+        border-radius: 5px;
+        text-decoration: none;
+        margin-right: 5px;
+        font-size: 0.9rem;
+    }
+    
+    .btn-edit {
+        background: #2196f3;
+        color: white;
+    }
+    
+    .btn-delete {
+        background: #f44336;
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
+    
+    .nav-links {
+        margin-bottom: 20px;
+        padding: 15px;
+        background: white;
+        border-radius: 10px;
+    }
+    
+    .nav-links a {
+        margin-right: 15px;
+        color: #128c7e;
+        text-decoration: none;
+        font-weight: 600;
+    }
+    
+    .table-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        width: 100%;
+    }
+    
+    table {
+        width: 100%;
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        border-collapse: collapse;
+    }
+    
+    @@media (max-width: 1200px) {
+        .admin-container {
+            max-width: 100%;
+            padding: 15px;
+        }
+        
+        table {
+            min-width: 800px;
+        }
+    }
+    
+    @@media (max-width: 768px) {
+        .admin-container {
+            padding: 10px;
+        }
+        
+        .page-header {
+            flex-direction: column;
+            gap: 15px;
+            align-items: flex-start;
+        }
+        
+        table {
+            font-size: 0.85rem;
+            min-width: 700px;
+        }
+        
+        th, td {
+            padding: 8px;
+        }
+        
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: 0.8rem;
+        }
+    }
+</style>
+
+<div class="admin-container">
+    <div class="nav-links">
+        <a href="@Url.Action("ManageCities")" style="color: #075e54;">Cities</a> |
+        <a href="@Url.Action("ManageCategories")">Categories</a> |
+        <a href="@Url.Action("ManageFertilizerProducts")">Products</a> |
+        <a href="@Url.Action("ManageStores")">Stores</a>
+    </div>
+
+    <div class="page-header">
+        <h2>🏙️ Manage Cities</h2>
+        <a href="@Url.Action("CreateCity")" class="btn-primary">+ Add New City</a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div style="background: #d4edda; color: #155724; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+            ✅ @TempData["SuccessMessage"]
+        </div>
+    }
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Urdu Name</th>
+                    <th>District</th>
+                    <th>Region</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var city in Model)
+                {
+                    <tr>
+                        <td>@city.Name</td>
+                        <td>@city.NameUrdu</td>
+                        <td>@city.District</td>
+                        <td>@city.Region</td>
+                        <td>
+                            @if (city.IsActive)
+                            {
+                                <span style="color: green;">✓ Active</span>
+                            }
+                            else
+                            {
+                                <span style="color: red;">✗ Inactive</span>
+                            }
+                        </td>
+                        <td>
+                            <a href="@Url.Action("EditCity", new { id = city.Id })" class="btn-sm btn-edit">Edit</a>
+                            <form method="post" action="@Url.Action("DeleteCity", new { id = city.Id })" style="display: inline;" onsubmit="return confirmDelete('@city.Name');">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn-sm btn-delete">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    function confirmDelete(cityName) {
+        return confirm('Are you sure you want to delete "' + cityName + '"?\n\nThis action cannot be undone.');
+    }
+</script>

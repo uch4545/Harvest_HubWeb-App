@@ -1,0 +1,200 @@
+@model HarvestHub.WebApp.ViewModels.CreateStoreViewModel
+@{
+    ViewData["Title"] = "Add New Store";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .form-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 30px;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group-full {
+        grid-column: 1 / -1;
+    }
+    
+    label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #333;
+    }
+    
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="number"],
+    select,
+    textarea {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        font-size: 1rem;
+    }
+    
+    input[type="checkbox"] {
+        width: auto;
+        margin-right: 8px;
+    }
+    
+    textarea {
+        resize: vertical;
+        min-height: 80px;
+    }
+    
+    .btn-submit {
+        background: #128c7e;
+        color: white;
+        padding: 12px 30px;
+        border: none;
+        border-radius: 10px;
+        font-size: 1rem;
+        cursor: pointer;
+        margin-right: 10px;
+    }
+    
+    .btn-submit:hover {
+        background: #075e54;
+    }
+    
+    .btn-cancel {
+        background: #666;
+        color: white;
+        padding: 12px 30px;
+        border-radius: 10px;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .section-title {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #075e54;
+        margin: 25px 0 15px 0;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #128c7e;
+    }
+</style>
+
+<div class="form-container">
+    <h2>🏪 Add New Store / نئی دکان شامل کریں</h2>
+    
+    <form method="post" asp-action="CreateStore">
+        @Html.AntiForgeryToken()
+        
+        <div class="section-title">Store Information / دکان کی معلومات</div>
+        
+        <div class="form-grid">
+            <div class="form-group form-group-full">
+                <label asp-for="StoreName">Store Name / دکان کا نام *</label>
+                <input asp-for="StoreName" type="text" placeholder="e.g., Ali Agri Store" required />
+                <span asp-validation-for="StoreName" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group form-group-full">
+                <label asp-for="StoreType">Store Type / دکان کی قسم</label>
+                <select asp-for="StoreType" required>
+                    <option value="All">All Products / تمام پروڈکٹس</option>
+                    <option value="Fertilizers">Fertilizers Only / صرف کھاد</option>
+                    <option value="Pesticides">Pesticides Only / صرف کیڑے مار دوا</option>
+                    <option value="Seeds">Seeds Only / صرف بیج</option>
+                    <option value="Farming Tools">Farming Tools / زرعی آلات</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label asp-for="OwnerName">Owner Name / مالک کا نام</label>
+                <input asp-for="OwnerName" type="text" placeholder="e.g., Muhammad Ali" />
+            </div>
+            
+            <div class="form-group">
+                <label asp-for="ContactNumber">Contact Number / رابطہ نمبر *</label>
+                <input asp-for="ContactNumber" type="tel" placeholder="+92-300-1234567" required />
+                <span asp-validation-for="ContactNumber" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group">
+                <label asp-for="WhatsAppNumber">WhatsApp Number / واٹس ایپ نمبر</label>
+                <input asp-for="WhatsAppNumber" type="tel" placeholder="+92-300-1234567" />
+            </div>
+            
+            <div class="form-group">
+                <label asp-for="Email">Email Address / ای میل</label>
+                <input asp-for="Email" type="email" placeholder="store@example.com" />
+            </div>
+        </div>
+        
+        <div class="section-title">Location Details / مقام کی تفصیلات</div>
+        
+        <div class="form-grid">
+            <div class="form-group">
+                <label asp-for="CityId">City / شہر *</label>
+                <select asp-for="CityId" required>
+                    <option value="">Select City / شہر منتخب کریں</option>
+                    @foreach (var city in Model.Cities)
+                    {
+                        <option value="@city.Id">
+                            @city.Name @(!string.IsNullOrEmpty(city.NameUrdu) ? $"({city.NameUrdu})" : "")
+                        </option>
+                    }
+                </select>
+                <span asp-validation-for="CityId" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group form-group-full">
+                <label asp-for="Address">Complete Address / مکمل پتہ *</label>
+                <textarea asp-for="Address" placeholder="Street, Area, Landmark" required></textarea>
+                <span asp-validation-for="Address" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group">
+                <label asp-for="Latitude">Latitude (Optional)</label>
+                <input asp-for="Latitude" type="number" step="0.000001" placeholder="30.1575" />
+            </div>
+            
+            <div class="form-group">
+                <label asp-for="Longitude">Longitude (Optional)</label>
+                <input asp-for="Longitude" type="number" step="0.000001" placeholder="71.5249" />
+            </div>
+        </div>
+        
+        <div class="section-title">Settings / ترتیبات</div>
+        
+        <div class="form-group">
+            <label>
+                <input asp-for="IsVerified" type="checkbox" />
+                Mark as Verified Store / تصدیق شدہ دکان
+            </label>
+        </div>
+        
+        <div class="form-group">
+            <label>
+                <input asp-for="IsActive" type="checkbox" />
+                Active (Visible to Farmers) / فعال (کسانوں کو نظر آئے)
+            </label>
+        </div>
+        
+        <div style="margin-top: 30px;">
+            <button type="submit" class="btn-submit">
+                💾 Save Store / محفوظ کریں
+            </button>
+            <a href="@Url.Action("ManageStores")" class="btn-cancel">Cancel / منسوخ</a>
+        </div>
+    </form>
+</div>

@@ -1,0 +1,219 @@
+@model HarvestHub.WebApp.Models.FertilizerProduct
+@{
+    ViewData["Title"] = "Add Product";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .form-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 30px;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group-full {
+        grid-column: 1 / -1;
+    }
+    
+    label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #333;
+    }
+    
+    input[type="text"],
+    input[type="number"],
+    input[type="file"],
+    select,
+    textarea {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        font-size: 1rem;
+    }
+    
+    textarea {
+        resize: vertical;
+        min-height: 80px;
+    }
+    
+    .btn-submit {
+        background: #128c7e;
+        color: white;
+        padding: 12px 30px;
+        border: none;
+        border-radius: 10px;
+        font-size: 1rem;
+        cursor: pointer;
+        margin-right: 10px;
+    }
+    
+    .btn-submit:hover {
+        background: #075e54;
+    }
+    
+    .btn-cancel {
+        background: #666;
+        color: white;
+        padding: 12px 30px;
+        border-radius: 10px;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .section-title {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #075e54;
+        margin: 25px 0 15px 0;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #128c7e;
+    }
+</style>
+
+<div class="form-container">
+    <h2>📦 Add New Product / نیا پروڈکٹ شامل کریں</h2>
+    
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div style="background: #fee; border: 2px solid #c00; color: #c00; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+            <strong>❌ Error:</strong> @TempData["ErrorMessage"]
+        </div>
+    }
+    
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div style="background: #efe; border: 2px solid #0a0; color: #0a0; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+            <strong>✅ Success:</strong> @TempData["SuccessMessage"]
+        </div>
+    }
+    
+    <form method="post" asp-action="CreateProduct" enctype="multipart/form-data">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        
+        <div class="section-title">Basic Information / بنیادی معلومات</div>
+        
+        <div class="form-grid">
+            <div class="form-group form-group-full">
+                <label asp-for="Name">Product Name (English) *</label>
+                <input asp-for="Name" type="text" placeholder="e.g., Engro Urea" required />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group form-group-full">
+                <label asp-for="NameUrdu">Product Name (Urdu)</label>
+                <input asp-for="NameUrdu" type="text" placeholder="مثال: اینگرو یوریا" />
+            </div>
+            
+            <div class="form-group">
+                <label asp-for="CategoryId">Category / قسم *</label>
+                <select asp-for="CategoryId" class="form-control" required>
+                    <option value="">-- Select Category --</option>
+                    @foreach (var category in ViewBag.Categories as List<HarvestHub.WebApp.Models.FertilizerCategory>)
+                    {
+                        <option value="@category.Id">@category.Icon @category.Name</option>
+                    }
+                </select>
+                <span asp-validation-for="CategoryId" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group">
+                <label asp-for="Brand">Brand / برانڈ</label>
+                <input asp-for="Brand" type="text" placeholder="e.g., Engro" />
+            </div>
+            
+            <div class="form-group">
+                <label asp-for="ManufacturerName">Manufacturer / بنانے والا</label>
+                <input asp-for="ManufacturerName" type="text" placeholder="e.g., Engro Corporation" />
+            </div>
+            
+            <div class="form-group">
+                <label>Product Image / تصویر</label>
+                <input type="file" name="imageFile" accept="image/*" />
+            </div>
+        </div>
+        
+        <div class="section-title">Product Details / تفصیلات</div>
+        
+        <div class="form-grid">
+            <div class="form-group">
+                <label asp-for="PackageSize">Package Size / پیک سائز</label>
+                <input asp-for="PackageSize" type="text" placeholder="e.g., 50" />
+            </div>
+            
+            <div class="form-group">
+                <label asp-for="Unit">Unit / اکائی</label>
+                <select asp-for="Unit">
+                    <option value="kg">Kilogram (kg)</option>
+                    <option value="liter">Liter (L)</option>
+                    <option value="ml">Milliliter (ml)</option>
+                    <option value="grams">Grams (g)</option>
+                    <option value="piece">Piece</option>
+                </select>
+            </div>
+            
+            <div class="form-group form-group-full">
+                <label asp-for="Description">Description / تفصیل</label>
+                <textarea asp-for="Description" placeholder="Product description..."></textarea>
+            </div>
+            
+            <div class="form-group form-group-full">
+                <label asp-for="UsageInstructions">Usage Instructions / استعمال کی ہدایات</label>
+                <textarea asp-for="UsageInstructions" placeholder="How to use this product..."></textarea>
+            </div>
+        </div>
+        
+        <div style="margin-top: 30px;">
+            <button type="submit" class="btn-submit">
+                💾 Save Product / محفوظ کریں
+            </button>
+            <a href="@Url.Action("ManageFertilizerProducts")" class="btn-cancel">Cancel / منسوخ</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('form').on('submit', function(e) {
+                // Validate Product Name
+                var productName = $('#Name').val();
+                if (!productName || productName.trim() === '') {
+                    e.preventDefault();
+                    alert('Please enter Product Name');
+                    $('#Name').focus();
+                    return false;
+                }
+                
+                // Validate Category
+                var categoryId = $('#CategoryId').val();
+                if (!categoryId || categoryId === '') {
+                    e.preventDefault();
+                    alert('Please select a category / براہ کرم قسم منتخب کریں');
+                    $('#CategoryId').focus();
+                    return false;
+                }
+                
+                // If validation passes, show loading
+                $(this).find('button[type="submit"]').prop('disabled', true).text('Saving...');
+                return true;
+            });
+        });
+    </script>
+}

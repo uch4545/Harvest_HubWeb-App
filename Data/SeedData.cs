@@ -201,5 +201,173 @@ namespace HarvestHub.WebApp.Data
                 await context.SaveChangesAsync();
             }
         }
+
+        // ✅ Seed Fertilizer Marketplace Data
+        public static async Task SeedFertilizerMarketplaceAsync(ApplicationDbContext context)
+        {
+            // Seed Cities (South Punjab focus)
+            if (!context.Cities.Any())
+            {
+                context.Cities.AddRange(
+                    // Large Cities
+                    new City { Name = "Multan", NameUrdu = "ملتان", District = "Multan", Province = "Punjab", Region = "South Punjab" },
+                    new City { Name = "Bahawalpur", NameUrdu = "بہاولپور", District = "Bahawalpur", Province = "Punjab", Region = "South Punjab" },
+                    new City { Name = "Rahim Yar Khan", NameUrdu = "رحیم یار خان", District = "Rahim Yar Khan", Province = "Punjab", Region = "South Punjab" },
+                    new City { Name = "Dera Ghazi Khan", NameUrdu = "ڈیرہ غازی خان", District = "Dera Ghazi Khan", Province = "Punjab", Region = "South Punjab" },
+                    new City { Name = "Muzaffargarh", NameUrdu = "مظفر گڑھ", District = "Muzaffargarh", Province = "Punjab", Region = "South Punjab" },
+                    
+                    // Medium Cities
+                    new City { Name = "Sahiwal", NameUrdu = "ساہیوال", District = "Sahiwal", Province = "Punjab", Region = "South Punjab" },
+                    new City { Name = "Vehari", NameUrdu = "وہاڑی", District = "Vehari", Province = "Punjab", Region = "South Punjab" },
+                    new City { Name = "Lodhran", NameUrdu = "لودھراں", District = "Lodhran", Province = "Punjab", Region = "South Punjab" },
+                    new City { Name = "Khanewal", NameUrdu = "خانیوال", District = "Khanewal", Province = "Punjab", Region = "South Punjab" },
+                    new City { Name = "Rajanpur", NameUrdu = "راجن پور", District = "Rajanpur", Province = "Punjab", Region = "South Punjab" },
+                    
+                    // Smaller Cities
+                    new City { Name = "Kot Addu", NameUrdu = "کوٹ اڈو", District = "Muzaffargarh", Province = "Punjab", Region = "South Punjab" },
+                    new City { Name = "Jalalpur Pirwala", NameUrdu = "جلال پور پیروالا", District = "Multan", Province = "Punjab", Region = "South Punjab" },
+                    new City { Name = "Ahmedpur East", NameUrdu = "احمد پور شرقیہ", District = "Bahawalpur", Province = "Punjab", Region = "South Punjab" },
+                    new City { Name = "Liaquatpur", NameUrdu = "لیاقت پور", District = "Rahim Yar Khan", Province = "Punjab", Region = "South Punjab" },
+                    new City { Name = "Jampur", NameUrdu = "جام پور", District = "Rajanpur", Province = "Punjab", Region = "South Punjab" },
+                    new City { Name = "Taunsa", NameUrdu = "تونسہ", District = "Dera Ghazi Khan", Province = "Punjab", Region = "South Punjab" },
+                    new City { Name = "Kabirwala", NameUrdu = "کبیر والا", District = "Khanewal", Province = "Punjab", Region = "South Punjab" },
+                    new City { Name = "Minchinabad", NameUrdu = "منچن آباد", District = "Bahawalnagar", Province = "Punjab", Region = "South Punjab" },
+                    new City { Name = "Hasilpur", NameUrdu = "حاصل پور", District = "Bahawalpur", Province = "Punjab", Region = "South Punjab" },
+                    new City { Name = "Chichawatni", NameUrdu = "چیچہ وطنی", District = "Sahiwal", Province = "Punjab", Region = "South Punjab" }
+                );
+
+                await context.SaveChangesAsync();
+            }
+
+            // Seed Categories
+            if (!context.FertilizerCategories.Any())
+            {
+                context.FertilizerCategories.AddRange(
+                    new FertilizerCategory
+                    {
+                        Name = "Fertilizers",
+                        NameUrdu = "کھاد",
+                        Description = "Chemical and organic fertilizers for crops including Urea, DAP, NPK, etc.",
+                        Icon = "🌿"
+                    },
+                    new FertilizerCategory
+                    {
+                        Name = "Pesticides",
+                        NameUrdu = "کیڑے مار دوا",
+                        Description = "Insecticides, fungicides, and herbicides for crop protection",
+                        Icon = "🪲"
+                    },
+                    new FertilizerCategory
+                    {
+                        Name = "Seeds",
+                        NameUrdu = "بیج",
+                        Description = "High-quality certified seeds for various crops",
+                        Icon = "🌱"
+                    },
+                    new FertilizerCategory
+                    {
+                        Name = "Farming Tools",
+                        NameUrdu = "زرعی آلات",
+                        Description = "Hand tools and small farming equipment",
+                        Icon = "🛠️"
+                    },
+                    new FertilizerCategory
+                    {
+                        Name = "Other Supplies",
+                        NameUrdu = "دیگر سامان",
+                        Description = "Other agricultural supplies and materials",
+                        Icon = "📦"
+                    }
+                );
+
+                await context.SaveChangesAsync();
+            }
+
+            // Seed Sample Products
+            if (!context.FertilizerProducts.Any())
+            {
+                var fertilizersCategory = context.FertilizerCategories.FirstOrDefault(c => c.Name == "Fertilizers");
+                var pesticidesCategory = context.FertilizerCategories.FirstOrDefault(c => c.Name == "Pesticides");
+                var seedsCategory = context.FertilizerCategories.FirstOrDefault(c => c.Name == "Seeds");
+
+                if (fertilizersCategory != null)
+                {
+                    context.FertilizerProducts.AddRange(
+                        new FertilizerProduct
+                        {
+                            Name = "Engro Urea",
+                            NameUrdu = "اینگرو یوریا",
+                            CategoryId = fertilizersCategory.Id,
+                            Brand = "Engro",
+                            ManufacturerName = "Engro Fertilizers Ltd",
+                            Description = "High-quality Urea fertilizer containing 46% Nitrogen. Ideal for wheat, rice, and sugarcane crops.",
+                            PackageSize = "50kg",
+                            Unit = "Bag",
+                            ImageUrl = "/fertilizer-images/urea.jpg",
+                            UsageInstructions = "Apply 2-3 bags per acre for wheat, 3-4 bags for rice."
+                        },
+                        new FertilizerProduct
+                        {
+                            Name = "FFC DAP",
+                            NameUrdu = "ایف ایف سی ڈی اے پی",
+                            CategoryId = fertilizersCategory.Id,
+                            Brand = "FFC",
+                            ManufacturerName = "Fauji Fertilizer Company",
+                            Description = "Di-Ammonium Phosphate (DAP) containing 18% N and 46% P2O5. Excellent for root development.",
+                            PackageSize = "50kg",
+                            Unit = "Bag",
+                            ImageUrl = "/fertilizer-images/dap.jpg",
+                            UsageInstructions = "Apply 1-2 bags per acre at sowing time."
+                        }
+                    );
+                }
+
+                if (pesticidesCategory != null)
+                {
+                    context.FertilizerProducts.Add(
+                        new FertilizerProduct
+                        {
+                            Name = "Confidor",
+                            NameUrdu = "کنفیڈور",
+                            CategoryId = pesticidesCategory.Id,
+                            Brand = "Bayer",
+                            ManufacturerName = "Bayer CropScience",
+                            Description = "Systemic insecticide for control of sucking pests on cotton, vegetables, and fruits.",
+                            PackageSize = "100ml",
+                            Unit = "Bottle",
+                            ImageUrl = "/fertilizer-images/confidor.jpg",
+                            UsageInstructions = "Mix 10ml in 15 liters of water. Spray as needed."
+                        }
+                    );
+                }
+
+                await context.SaveChangesAsync();
+            }
+
+            // Seed Sample Store
+            if (!context.AgriSupplyStores.Any())
+            {
+                var multan = context.Cities.FirstOrDefault(c => c.Name == "Multan");
+                
+                if (multan != null)
+                {
+                    context.AgriSupplyStores.Add(
+                        new AgriSupplyStore
+                        {
+                            StoreName = "Ali Agri Store",
+                            OwnerName = "Muhammad Ali",
+                            CityId = multan.Id,
+                            Address = "Main Bosan Road, Multan",
+                            ContactNumber = "061-4567890",
+                            WhatsAppNumber = "0300-1234567",
+                            Email = "ali@agristore.com",
+                            IsVerified = true
+                        }
+                    );
+
+                    await context.SaveChangesAsync();
+                }
+            }
+        }
     }
 }

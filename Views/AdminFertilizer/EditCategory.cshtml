@@ -1,0 +1,118 @@
+@model HarvestHub.WebApp.Models.FertilizerCategory
+@{
+    ViewData["Title"] = "Edit Category";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .form-container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 30px;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #333;
+    }
+    
+    input[type="text"],
+    select {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        font-size: 1rem;
+    }
+    
+    .btn-submit {
+        background: #128c7e;
+        color: white;
+        padding: 12px 30px;
+        border: none;
+        border-radius: 10px;
+        font-size: 1rem;
+        cursor: pointer;
+        margin-right: 10px;
+    }
+    
+    .btn-submit:hover {
+        background: #075e54;
+    }
+    
+    .btn-cancel {
+        background: #666;
+        color: white;
+        padding: 12px 30px;
+        border-radius: 10px;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .icon-preview {
+        font-size: 3rem;
+        text-align: center;
+        padding: 20px;
+        background: #f5f5f5;
+        border-radius: 10px;
+        margin-top: 10px;
+    }
+</style>
+
+<div class="form-container">
+    <h2>✏️ Edit Category / قسم میں ترمیم</h2>
+    
+    <form method="post" asp-action="EditCategory">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id" />
+        
+        <div class="form-group">
+            <label asp-for="Name">Category Name (English) *</label>
+            <input asp-for="Name" type="text" placeholder="e.g., Fertilizers" required />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+        
+        <div class="form-group">
+            <label asp-for="NameUrdu">Category Name (Urdu)</label>
+            <input asp-for="NameUrdu" type="text" placeholder="مثال: کھاد" />
+        </div>
+        
+        <div class="form-group">
+            <label asp-for="Icon">Icon (Emoji)</label>
+            <select asp-for="Icon" id="iconSelect" onchange="updatePreview()">
+                <option value="🌾">🌾 Fertilizers / کھاد</option>
+                <option value="🦟">🦟 Pesticides / کیڑے مار</option>
+                <option value="🌱">🌱 Seeds / بیج</option>
+                <option value="🚜">🚜 Farming Tools / زرعی آلات</option>
+                <option value="💧">💧 Irrigation / آبپاشی</option>
+                <option value="🌿">🌿 Organic / نامیاتی</option>
+                <option value="⚗️">⚗️ Chemicals / کیمیکل</option>
+            </select>
+            <div class="icon-preview" id="iconPreview">@Model.Icon</div>
+        </div>
+        
+        <div style="margin-top: 30px;">
+            <button type="submit" class="btn-submit">
+                💾 Update Category
+            </button>
+            <a href="@Url.Action("ManageCategories")" class="btn-cancel">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<script>
+    function updatePreview() {
+        var select = document.getElementById('iconSelect');
+        var preview = document.getElementById('iconPreview');
+        preview.textContent = select.value;
+    }
+</script>

@@ -1,0 +1,295 @@
+@model List<HarvestHub.WebApp.Models.AgriSupplyStore>
+@{
+    ViewData["Title"] = "Manage Stores";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .admin-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+    }
+    
+    .btn-primary {
+        background: #128c7e;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 10px;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+    }
+    
+    .btn-primary:hover {
+        background: #075e54;
+        color: white;
+    }
+    
+    .filter-section {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
+    
+    .table-wrapper {
+        width: 100%;
+    }
+    
+    table {
+        width: 100%;
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+    
+    th {
+        background: #128c7e;
+        color: white;
+        padding: 15px;
+        text-align: left;
+        word-wrap: break-word;
+    }
+    
+    th:nth-child(1) { width: 18%; } /* Store Name */
+    th:nth-child(2) { width: 13%; } /* Owner */
+    th:nth-child(3) { width: 11%; } /* City */
+    th:nth-child(4) { width: 13%; } /* Contact */
+    th:nth-child(5) { width: 13%; } /* WhatsApp */
+    th:nth-child(6) { width: 10%; } /* Status */
+    th:nth-child(7) { width: 22%; } /* Actions */
+    
+    td {
+        padding: 15px;
+        border-bottom: 1px solid #eee;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+    
+    .btn-sm {
+        padding: 6px 12px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 0.9rem;
+        margin-right: 5px;
+        display: inline-block;
+    }
+    
+    .btn-edit {
+        background: #2196F3;
+        color: white;
+    }
+    
+    .btn-delete {
+        background: #f44336;
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
+    
+    .badge {
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+    
+    .badge-verified {
+        background: #4caf50;
+        color: white;
+    }
+    
+    .badge-unverified {
+        background: #ff9800;
+        color: white;
+    }
+    
+    .nav-links {
+        margin-bottom: 20px;
+        padding: 15px;
+        background: white;
+        border-radius: 10px;
+    }
+    
+    .nav-links a {
+        margin-right: 15px;
+        color: #128c7e;
+        text-decoration: none;
+        font-weight: 600;
+    }
+    
+    @@media (max-width: 1400px) {
+        .admin-container {
+            max-width: 100%;
+            padding: 15px;
+        }
+    }
+    
+    @@media (max-width: 768px) {
+        .admin-container {
+            padding: 10px;
+        }
+        
+        .page-header {
+            flex-direction: column;
+            gap: 15px;
+            align-items: flex-start;
+        }
+        
+        .filter-section form {
+            flex-direction: column;
+        }
+        
+        table {
+            font-size: 0.8rem;
+        }
+        
+        th, td {
+            padding: 6px;
+            font-size: 0.75rem;
+        }
+        
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 0.75rem;
+            margin-right: 3px;
+            margin-bottom: 3px;
+            display: inline-block;
+        }
+        
+        th:nth-child(1) { width: 15%; } /* Store Name */
+        th:nth-child(2) { width: 12%; } /* Owner */
+        th:nth-child(3) { width: 10%; } /* City */
+        th:nth-child(4) { width: 14%; } /* Contact */
+        th:nth-child(5) { width: 14%; } /* WhatsApp */
+        th:nth-child(6) { width: 10%; } /* Status */
+        th:nth-child(7) { width: 25%; } /* Actions */
+    }
+</style>
+
+<div class="admin-container">
+    <div class="nav-links">
+        <a href="@Url.Action("ManageCities")">Cities</a> |
+        <a href="@Url.Action("ManageCategories")">Categories</a> |
+       <!--  <a href="@Url.Action("ManageFertilizerProducts")">Products</a> | -->
+        <a href="@Url.Action("ManageStores")" style="color: #075e54;">Stores</a>
+    </div>
+
+    <div class="page-header">
+        <h2>Manage Stores / دکانیں منظم کریں</h2>
+        <a href="@Url.Action("CreateStore")" class="btn-primary">+ Add New Store</a>
+    </div>
+    
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div style="background: #4caf50; color: white; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+    
+    <div class="filter-section">
+        <form method="get" asp-action="ManageStores" style="display: flex; gap: 15px; align-items: end;">
+            <div style="flex: 1;">
+                <label style="display: block; margin-bottom: 5px; font-weight: 600;">Filter by City</label>
+                <select name="cityId" class="form-control" onchange="this.form.submit()">
+                    <option value="">All Cities</option>
+                    @foreach (var city in ViewBag.Cities as List<HarvestHub.WebApp.Models.City>)
+                    {
+                        <option value="@city.Id" @@(ViewBag.SelectedCityId == city.Id ? "selected" : "")>
+                            @city.Name
+                        </option>
+                    }
+                </select>
+            </div>
+        </form>
+    </div>
+    
+    @if (Model.Any())
+    {
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Store Name</th>
+                        <th>Owner</th>
+                        <th>City</th>
+                        <th>Contact</th>
+                        <th>WhatsApp</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var store in Model)
+                    {
+                        <tr>
+                            <td>
+                                <strong>@store.StoreName</strong>
+                                @if (store.IsVerified)
+                                {
+                                    <span class="badge badge-verified">✓ Verified</span>
+                                }
+                            </td>
+                            <td>@store.OwnerName</td>
+                            <td>📍 @store.City.Name</td>
+                            <td>📞 @store.ContactNumber</td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(store.WhatsAppNumber))
+                                {
+                                    <span>💬 @store.WhatsAppNumber</span>
+                                }
+                                else
+                                {
+                                    <span style="color: #999;">-</span>
+                                }
+                            </td>
+                            <td>
+                                @if (store.IsActive)
+                                {
+                                    <span style="color: #4caf50; font-weight: 600;">Active</span>
+                                }
+                                else
+                                {
+                                    <span style="color: #999;">Inactive</span>
+                                }
+                            </td>
+                            <td>
+                                <a href="@Url.Action("EditStore", new { id = store.Id })" class="btn-sm btn-edit">Edit</a>
+                                <form method="post" asp-action="DeleteStore" asp-route-id="@store.Id" style="display: inline;" onsubmit="return confirmDelete('@store.StoreName');">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn-sm btn-delete">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div style="background: white; padding: 60px; text-align: center; border-radius: 15px;">
+            <p style="font-size: 1.2rem; color: #666;">No stores found</p>
+            <p style="margin-top: 15px;">
+                <a href="@Url.Action("CreateStore")" class="btn-primary">Add your first store</a>
+            </p>
+        </div>
+    }
+</div>
+
+<script>
+    function confirmDelete(storeName) {
+        return confirm('Are you sure you want to delete "' + storeName + '"?\n\nThis action cannot be undone.');
+    }
+</script>

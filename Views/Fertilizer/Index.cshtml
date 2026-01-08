@@ -1,0 +1,206 @@
+@model HarvestHub.WebApp.ViewModels.FertilizerMarketplaceViewModel
+@{
+    ViewData["Title"] = "Agricultural Supplies";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .marketplace-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .page-header {
+        background: linear-gradient(135deg, #075e54, #128c7e);
+        color: white;
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 25px;
+        text-align: center;
+    }
+    
+    .category-pills {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+        justify-content: center;
+    }
+    
+    .category-pill {
+        padding: 10px 20px;
+        border-radius: 25px;
+        border: 2px solid #128c7e;
+        background: white;
+        color: #075e54;
+        text-decoration: none;
+        transition: all 0.3s;
+        font-weight: 600;
+    }
+    
+    .category-pill:hover, .category-pill.active {
+        background: #128c7e;
+        color: white;
+    }
+    
+    .products-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+    }
+    
+    .product-card {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: transform 0.3s;
+        text-decoration: none;
+        color: #333;
+    }
+    
+    .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    
+    .product-image {
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+        border-radius: 10px;
+        background: #f0f0f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+    }
+    
+    .product-name {
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin-top: 15px;
+        color: #075e54;
+    }
+    
+    .product-brand {
+        font-size: 0.9rem;
+        color: #666;
+        margin-top: 5px;
+    }
+    
+    .product-category {
+        display: inline-block;
+        padding: 5px 10px;
+        background: #e8f5e9;
+        border-radius: 5px;
+        font-size: 0.8rem;
+        margin-top: 10px;
+    }
+    
+    .store-link-btn {
+        display: inline-block;
+        margin-top: 20px;
+        padding: 12px 30px;
+        background: #128c7e;
+        color: white;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+    
+    .store-link-btn:hover {
+        background: #075e54;
+        color: white;
+    }
+    
+    .no-products {
+        text-align: center;
+        padding: 60px 20px;
+        color: #666;
+        font-size: 1.2rem;
+    }
+</style>
+
+<div class="marketplace-container">
+    <div class="page-header">
+        <h1>🌱 Agricultural Supplies Marketplace</h1>
+        <p style="margin-top: 10px; opacity: 0.9;">زرعی سامان کی منڈی</p>
+        <p style="margin-top: 10px;">Fertilizers, Pesticides, Seeds & More</p>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div style="background: #d4edda; color: #155724; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+            ✅ @TempData["SuccessMessage"]
+        </div>
+    }
+
+    <!-- Category Filters -->
+    <div class="category-pills">
+        <a href="@Url.Action("Index")" class="category-pill @(Model.SelectedCategoryId == null ? "active" : "")">
+            All Products
+        </a>
+        @foreach (var category in Model.Categories)
+        {
+            <a href="@Url.Action("Index", new { categoryId = category.Id })" 
+               class="category-pill @(Model.SelectedCategoryId == category.Id ? "active" : "")">
+                @category.Icon @category.Name
+            </a>
+        }
+    </div>
+
+    <!-- Store Directory Link -->
+    <div style="text-align: center; margin-bottom: 20px;">
+        <a href="@Url.Action("StoreDirectory")" class="store-link-btn">
+            🏪 View All Stores / تمام دکانیں دیکھیں
+        </a>
+    </div>
+
+    <!-- Products Grid -->
+    @if (Model.Products.Any())
+    {
+        <div class="products-grid">
+            @foreach (var product in Model.Products)
+            {
+                <a href="@Url.Action("ProductDetails", new { id = product.Id })" class="product-card">
+                    <div class="product-image">
+                        @if (!string.IsNullOrEmpty(product.ImageUrl))
+                        {
+                            <img src="@product.ImageUrl" alt="@product.Name" style="width: 100%; height: 100%; object-fit: cover; border-radius: 10px;" />
+                        }
+                        else
+                        {
+                            @product.Category?.Icon
+                        }
+                    </div>
+                    <div class="product-name">@product.Name</div>
+                    @if (!string.IsNullOrEmpty(product.NameUrdu))
+                    {
+                        <div style="font-size: 0.9rem; color: #888;">@product.NameUrdu</div>
+                    }
+                    @if (!string.IsNullOrEmpty(product.Brand))
+                    {
+                        <div class="product-brand">Brand: @product.Brand</div>
+                    }
+                    <div class="product-category">
+                        @product.Category?.Icon @product.Category?.Name
+                    </div>
+                </a>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="no-products">
+            <p>📦 No products found</p>
+            <p style="font-size: 0.9rem; margin-top: 10px;">کوئی پروڈکٹ نہیں ملا</p>
+            <p style="margin-top: 20px;">
+                <a href="@Url.Action("Index")" style="color: #128c7e;">View All Products</a>
+            </p>
+        </div>
+    }
+</div>

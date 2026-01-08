@@ -1,0 +1,184 @@
+@model HarvestHub.WebApp.ViewModels.StoreDirectoryViewModel
+@{
+    ViewData["Title"] = "Store Directory";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .directory-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .page-header {
+        background: linear-gradient(135deg, #075e54, #128c7e);
+        color: white;
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 25px;
+        text-align: center;
+    }
+    
+    .city-filter {
+        background: white;
+        padding: 20px;
+        border-radius: 15px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .city-filter select {
+        width: 100%;
+        max-width: 400px;
+        padding: 12px;
+        border: 2px solid #128c7e;
+        border-radius: 10px;
+        font-size: 1rem;
+    }
+    
+    .stores-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+    }
+    
+    .store-card {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: transform 0.3s;
+    }
+    
+    .store-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    
+    .store-name {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #075e54;
+        margin-bottom: 10px;
+    }
+    
+    .store-info {
+        margin: 8px 0;
+        color: #666;
+    }
+    
+    .verified-badge {
+        display: inline-block;
+        padding: 5px 10px;
+        background: #4caf50;
+        color: white;
+        border-radius: 5px;
+        font-size: 0.8rem;
+        margin-top: 10px;
+    }
+    
+    .contact-btn {
+        display: inline-block;
+        padding: 10px 20px;
+        background: #25d366;
+        color: white;
+        border-radius: 10px;
+        text-decoration: none;
+        margin-top: 15px;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+    
+    .contact-btn:hover {
+        background: #1da851;
+        color: white;
+    }
+</style>
+
+<div class="directory-container">
+    <div class="page-header">
+        <h1>🏪 Agricultural Supply Stores</h1>
+        <p style="margin-top: 10px; opacity: 0.9;">زرعی سامان کی دکانیں</p>
+    </div>
+
+    <!-- City Filter -->
+    <div class="city-filter" style="text-align: center;">
+        <h3 style="margin-bottom: 15px;">Filter by City / شہر کے لحاظ سے فلٹر کریں</h3>
+        <form method="get" action="@Url.Action("StoreDirectory")">
+            <select name="cityId" onchange="this.form.submit()" class="form-select">
+                <option value="">All Cities / تمام شہر</option>
+                @foreach (var city in Model.Cities)
+                {
+                    <option value="@city.Id" @@(Model.SelectedCityId == city.Id ? "selected" : "")>
+                        @city.Name (@city.NameUrdu)
+                    </option>
+                }
+            </select>
+        </form>
+    </div>
+
+    <!-- Stores Grid -->
+    @if (Model.Stores.Any())
+    {
+        <div class="stores-grid">
+            @foreach (var store in Model.Stores)
+            {
+                <div class="store-card">
+                    <div class="store-name">@store.StoreName</div>
+                    
+                    @if (!string.IsNullOrEmpty(store.OwnerName))
+                    {
+                        <div class="store-info">
+                            👤 Owner: @store.OwnerName
+                        </div>
+                    }
+                    
+                    <div class="store-info">
+                        📍 @store.Address
+                    </div>
+                    
+                    <div class="store-info">
+                        🏙️ City: @store.City.Name
+                    </div>
+                    
+                    <div class="store-info">
+                        📞 @store.ContactNumber
+                    </div>
+                    
+                    @if (store.IsVerified)
+                    {
+                        <span class="verified-badge">✓ Verified</span>
+                    }
+                    
+                    <div>
+                        @if (!string.IsNullOrEmpty(store.WhatsAppNumber))
+                        {
+                            <a href="https://wa.me/@store.WhatsAppNumber.Replace("+", "").Replace("-", "").Replace(" ", "")" 
+                               class="contact-btn" target="_blank">
+                                💬 WhatsApp
+                            </a>
+                        }
+                        <a href="@Url.Action("StoreDetails", new { id = store.Id })" 
+                           class="contact-btn" style="background: #128c7e;">
+                            View Details
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div style="text-align: center; padding: 60px 20px; color: #666;">
+            <p style="font-size: 1.2rem;">🏪 No stores found</p>
+            <p style="margin-top: 10px;">کوئی دکان نہیں ملی</p>
+        </div>
+    }
+    
+    <div style="text-align: center; margin-top: 30px;">
+        <a href="@Url.Action("Index")" class="contact-btn" style="background: #075e54;">
+            ← Back to Products / واپس پروڈکٹس پر
+        </a>
+    </div>
+</div>

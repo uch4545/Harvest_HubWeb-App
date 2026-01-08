@@ -482,20 +482,29 @@
                     <input type="hidden" id="modalCropId" name="CropId" />
                     
                     <div class="form-group">
-                        <label for="quantity">Quantity (kg) / مقدار</label>
+                        <label for="unit">Unit / یونٹ</label>
+                        <select id="unit" name="Unit" class="form-control" required onchange="calculateTotal()">
+                            <option value="Kg">Kilogram (Kg)</option>
+                            <option value="40kg Bag">40kg Bag</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="quantity">Quantity / مقدار</label>
                         <input type="number" id="quantity" name="Quantity" class="form-control" 
-                               min="200" step="1" placeholder="Minimum 200 kg" required 
+                               min="1" step="0.01" placeholder="Enter quantity" required 
                                oninput="calculateTotal()" />
-                        <small class="text-muted">Minimum order: 200 kg (کم از کم آرڈر: 200 کلو)</small>
-                        <div id="quantityError" class="error-message" style="display: none;">
-                            Quantity must be at least 200 kg! (مقدار کم از کم 200 کلو ہونی چاہیے)
-                        </div>
+                        <small class="text-muted">Enter the quantity you want to purchase</small>
                     </div>
                     
                     <div class="price-calculator">
                         <div class="calc-row">
+                            <span>Unit:</span>
+                            <strong id="displayUnit">Kg</strong>
+                        </div>
+                        <div class="calc-row">
                             <span>Quantity:</span>
-                            <strong id="displayQuantity">0 kg</strong>
+                            <strong id="displayQuantity">0</strong>
                         </div>
                         <div class="calc-row">
                             <span>Rate per Unit:</span>
@@ -767,7 +776,7 @@
         
         // Reset form
         document.getElementById('quantity').value = '';
-        document.getElementById('quantityError').style.display = 'none';
+        document.getElementById('unit').value = 'Kg';
         calculateTotal();
         
         document.getElementById('buyNowModal').style.display = 'flex';
@@ -781,20 +790,14 @@
 
     function calculateTotal() {
         const quantity = parseFloat(document.getElementById('quantity').value) || 0;
+        const unit = document.getElementById('unit').value;
         const rate = currentCropData.rate;
         const total = quantity * rate;
         
         // Update display
-        document.getElementById('displayQuantity').textContent = quantity + ' kg';
+        document.getElementById('displayUnit').textContent = unit;
+        document.getElementById('displayQuantity').textContent = quantity;
         document.getElementById('displayTotal').textContent = 'Rs. ' + total.toLocaleString();
-        
-        // Validate minimum quantity
-        const errorDiv = document.getElementById('quantityError');
-        if (quantity > 0 && quantity < 200) {
-            errorDiv.style.display = 'block';
-        } else {
-            errorDiv.style.display = 'none';
-        }
     }
 
     // Form validation before submit
@@ -804,9 +807,9 @@
             form.addEventListener('submit', function(e) {
                 const quantity = parseFloat(document.getElementById('quantity').value) || 0;
                 
-                if (quantity < 200) {
+                if (quantity <= 0) {
                     e.preventDefault();
-                    document.getElementById('quantityError').style.display = 'block';
+                    alert('Please enter a valid quantity!');
                     document.getElementById('quantity').focus();
                     return false;
                 }

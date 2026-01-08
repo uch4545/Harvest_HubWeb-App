@@ -31,6 +31,13 @@ namespace Data
         // Notifications
         public DbSet<Notification> Notifications { get; set; }
 
+        // Fertilizer Marketplace
+        public DbSet<City> Cities { get; set; }
+        public DbSet<FertilizerCategory> FertilizerCategories { get; set; }
+        public DbSet<FertilizerProduct> FertilizerProducts { get; set; }
+        public DbSet<AgriSupplyStore> AgriSupplyStores { get; set; }
+        public DbSet<StoreProduct> StoreProducts { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -111,6 +118,36 @@ namespace Data
                 .WithMany()
                 .HasForeignKey(n => n.OrderId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // Fertilizer Marketplace Relationships
+
+            // FertilizerProduct → Category: restrict cascade
+            modelBuilder.Entity<FertilizerProduct>()
+                .HasOne(p => p.Category)
+                .WithMany(c => c.Products)
+                .HasForeignKey(p => p.CategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // AgriSupplyStore → City: restrict cascade
+            modelBuilder.Entity<AgriSupplyStore>()
+                .HasOne(s => s.City)
+                .WithMany(c => c.Stores)
+                .HasForeignKey(s => s.CityId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // StoreProduct → Store: cascade delete (if store deleted, remove links)
+            modelBuilder.Entity<StoreProduct>()
+                .HasOne(sp => sp.Store)
+                .WithMany(s => s.StoreProducts)
+                .HasForeignKey(sp => sp.StoreId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // StoreProduct → Product: cascade delete (if product deleted, remove links)
+            modelBuilder.Entity<StoreProduct>()
+                .HasOne(sp => sp.Product)
+                .WithMany(p => p.StoreProducts)
+                .HasForeignKey(sp => sp.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

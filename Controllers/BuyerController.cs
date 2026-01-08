@@ -238,7 +238,7 @@ namespace HarvestHub.Controllers
         
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> PlaceOrder(int cropId, decimal quantity)
+        public async Task<IActionResult> PlaceOrder(int cropId, decimal quantity, string unit)
         {
             try
             {
@@ -260,9 +260,9 @@ namespace HarvestHub.Controllers
                 }
 
                 // Validate quantity
-                if (quantity < 200)
+                if (quantity <= 0)
                 {
-                    TempData["ErrorMessage"] = "Minimum order quantity is 200 kg.";
+                    TempData["ErrorMessage"] = "Please enter a valid quantity.";
                     return RedirectToAction("Dashboard");
                 }
 
@@ -294,7 +294,7 @@ namespace HarvestHub.Controllers
                     TotalPrice = totalPrice,
                     IsRead = false,
                     CreatedAt = DateTime.UtcNow,
-                    Message = $"New order from {buyer.FullName} for {quantity} kg of {crop.Name}"
+                    Message = $"New order from {buyer.FullName} for {quantity} {unit} of {crop.Name}"
                 };
 
                 _context.Notifications.Add(notification);

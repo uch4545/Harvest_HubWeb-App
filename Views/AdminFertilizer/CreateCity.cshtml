@@ -1,0 +1,118 @@
+@model HarvestHub.WebApp.Models.City
+@{
+    ViewData["Title"] = Model.Id == 0 ? "Add City" : "Edit City";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .form-container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 30px;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #333;
+    }
+    
+    input[type="text"],
+    input[type="checkbox"],
+    select {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        font-size: 1rem;
+    }
+    
+    input[type="checkbox"] {
+        width: auto;
+    }
+    
+    .btn-submit {
+        background: #128c7e;
+        color: white;
+        padding: 12px 30px;
+        border: none;
+        border-radius: 10px;
+        font-size: 1rem;
+        cursor: pointer;
+        margin-right: 10px;
+    }
+    
+    .btn-submit:hover {
+        background: #075e54;
+    }
+    
+    .btn-cancel {
+        background: #666;
+        color: white;
+        padding: 12px 30px;
+        border-radius: 10px;
+        text-decoration: none;
+        display: inline-block;
+    }
+</style>
+
+<div class="form-container">
+    <h2>@ViewData["Title"]</h2>
+    
+    <form method="post" asp-action="@(Model.Id == 0 ? "CreateCity" : "EditCity")">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id" />
+        
+        <div class="form-group">
+            <label asp-for="Name">City Name (English)</label>
+            <input asp-for="Name" type="text" required />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+        
+        <div class="form-group">
+            <label asp-for="NameUrdu">City Name (Urdu)</label>
+            <input asp-for="NameUrdu" type="text" />
+        </div>
+        
+        <div class="form-group">
+            <label asp-for="District">District</label>
+            <input asp-for="District" type="text" required />
+            <span asp-validation-for="District" class="text-danger"></span>
+        </div>
+        
+        <div class="form-group">
+            <label asp-for="Province">Province</label>
+            <input asp-for="Province" type="text" value="Punjab" required />
+        </div>
+        
+        <div class="form-group">
+            <label asp-for="Region">Region</label>
+            <select asp-for="Region">
+                <option value="South Punjab">South Punjab</option>
+                <option value="Central Punjab">Central Punjab</option>
+                <option value="North Punjab">North Punjab</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label>
+                <input asp-for="IsActive" type="checkbox" /> Is Active
+            </label>
+        </div>
+        
+        <div style="margin-top: 30px;">
+            <button type="submit" class="btn-submit">
+                @(Model.Id == 0 ? "Add City" : "Update City")
+            </button>
+            <a href="@Url.Action("ManageCities")" class="btn-cancel">Cancel</a>
+        </div>
+    </form>
+</div>

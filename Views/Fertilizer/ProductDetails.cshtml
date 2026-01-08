@@ -1,0 +1,289 @@
+@model HarvestHub.WebApp.Models.FertilizerProduct
+@{
+    ViewData["Title"] = Model.Name;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .product-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .product-header {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .product-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+    }
+    
+    .product-image-section {
+        text-align: center;
+    }
+    
+    .product-image {
+        width: 100%;
+        max-width: 400px;
+        height: 400px;
+        object-fit: contain;
+        border-radius: 15px;
+        background: #f5f5f5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 5rem;
+        margin: 0 auto;
+    }
+    
+    .product-info {
+        padding: 20px;
+    }
+    
+    .product-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #075e54;
+        margin-bottom: 10px;
+    }
+    
+    .product-subtitle {
+        font-size: 1.2rem;
+        color: #666;
+        margin-bottom: 20px;
+    }
+    
+    .info-row {
+        margin: 15px 0;
+        padding: 15px;
+        background: #f5f5f5;
+        border-radius: 10px;
+    }
+    
+    .info-label {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 5px;
+    }
+    
+    .info-value {
+        color: #666;
+    }
+    
+    .category-badge {
+        display: inline-block;
+        padding: 8px 15px;
+        background: #128c7e;
+        color: white;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        margin: 10px 0;
+    }
+    
+    .stores-section {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        margin-top: 25px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #075e54;
+        margin-bottom: 20px;
+    }
+    
+    .store-card {
+        background: #f5f5f5;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 15px;
+    }
+    
+    .store-name {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #075e54;
+        margin-bottom: 10px;
+    }
+    
+    .store-info {
+        margin: 5px 0;
+        color: #666;
+    }
+    
+    .price-tag {
+        display: inline-block;
+        padding: 10px 20px;
+        background: #128c7e;
+        color: white;
+        border-radius: 10px;
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin-top: 10px;
+    }
+    
+    .contact-btn {
+        display: inline-block;
+        padding: 10px 20px;
+        background: #25d366;
+        color: white;
+        border-radius: 10px;
+        text-decoration: none;
+        margin-top: 10px;
+        margin-right: 10px;
+        font-weight: 600;
+    }
+    
+    .contact-btn:hover {
+        background: #1da851;
+        color: white;
+    }
+    
+    .back-btn {
+        display: inline-block;
+        padding: 12px 30px;
+        background: #075e54;
+        color: white;
+        border-radius: 10px;
+        text-decoration: none;
+        margin-bottom: 20px;
+        font-weight: 600;
+    }
+    
+    .back-btn:hover {
+        background: #128c7e;
+        color: white;
+    }
+    
+    @@media (max-width: 768px) {
+        .product-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="product-container">
+    <a href="@Url.Action("Index")" class="back-btn">← Back to Products / واپس</a>
+    
+    <div class="product-header">
+        <div class="product-grid">
+            <div class="product-image-section">
+                @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                {
+                    <img src="@Model.ImageUrl" alt="@Model.Name" class="product-image" style="height: auto;" />
+                }
+                else
+                {
+                    <div class="product-image">@Model.Category?.Icon</div>
+                }
+            </div>
+            
+            <div class="product-info">
+                <div class="product-title">@Model.Name</div>
+                @if (!string.IsNullOrEmpty(Model.NameUrdu))
+                {
+                    <div class="product-subtitle">@Model.NameUrdu</div>
+                }
+                
+                <div class="category-badge">
+                    @Model.Category?.Icon @Model.Category?.Name
+                </div>
+                
+                @if (!string.IsNullOrEmpty(Model.Brand))
+                {
+                    <div class="info-row">
+                        <div class="info-label">Brand / برانڈ</div>
+                        <div class="info-value">@Model.Brand</div>
+                    </div>
+                }
+                
+                @if (!string.IsNullOrEmpty(Model.ManufacturerName))
+                {
+                    <div class="info-row">
+                        <div class="info-label">Manufacturer / بنانے والا</div>
+                        <div class="info-value">@Model.ManufacturerName</div>
+                    </div>
+                }
+                
+                @if (!string.IsNullOrEmpty(Model.PackageSize))
+                {
+                    <div class="info-row">
+                        <div class="info-label">Package Size / پیک سائز</div>
+                        <div class="info-value">@Model.PackageSize @Model.Unit</div>
+                    </div>
+                }
+                
+                @if (!string.IsNullOrEmpty(Model.Description))
+                {
+                    <div class="info-row">
+                        <div class="info-label">Description / تفصیل</div>
+                        <div class="info-value">@Model.Description</div>
+                    </div>
+                }
+                
+                @if (!string.IsNullOrEmpty(Model.UsageInstructions))
+                {
+                    <div class="info-row">
+                        <div class="info-label">Usage Instructions / استعمال کی ہدایات</div>
+                        <div class="info-value">@Model.UsageInstructions</div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+    
+    @if (Model.StoreProducts != null && Model.StoreProducts.Any())
+    {
+        <div class="stores-section">
+            <div class="section-title">🏪 Available at These Stores / ان دکانوں پر دستیاب</div>
+            
+            @foreach (var storeProduct in Model.StoreProducts)
+            {
+                <div class="store-card">
+                    <div class="store-name">@storeProduct.Store.StoreName</div>
+                    <div class="store-info">📍 @storeProduct.Store.Address</div>
+                    <div class="store-info">🏙️ @storeProduct.Store.City.Name</div>
+                    <div class="store-info">📞 @storeProduct.Store.ContactNumber</div>
+                    
+                    @if (storeProduct.Price.HasValue)
+                    {
+                        <div class="price-tag">
+                            Rs. @storeProduct.Price.Value.ToString("N0")
+                        </div>
+                    }
+                    
+                    <div style="margin-top: 15px;">
+                        @if (!string.IsNullOrEmpty(storeProduct.Store.WhatsAppNumber))
+                        {
+                            <a href="https://wa.me/@storeProduct.Store.WhatsAppNumber.Replace("+", "").Replace("-", "").Replace(" ", "")" 
+                               class="contact-btn" target="_blank">
+                                💬 WhatsApp
+                            </a>
+                        }
+                        <a href="@Url.Action("StoreDetails", "Fertilizer", new { id = storeProduct.Store.Id })" class="contact-btn" style="background: #128c7e;">
+                            View Store / دکان دیکھیں
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="stores-section">
+            <p style="text-align: center; color: #666; padding: 40px 20px;">
+                🏪 No stores available for this product yet / ابھی کوئی دکان دستیاب نہیں
+            </p>
+        </div>
+    }
+</div>
